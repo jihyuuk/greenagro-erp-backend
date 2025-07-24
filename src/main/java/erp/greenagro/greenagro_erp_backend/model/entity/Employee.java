@@ -23,6 +23,8 @@ public class Employee {
 
     private String name; //이름
 
+    private String password; //비밀번호 (BCrypt 암호화)
+
     private String rrn; //주민번호 (뒷 자리 마스킹 필요)
 
     private String position; //직위
@@ -43,9 +45,10 @@ public class Employee {
     @Enumerated(EnumType.STRING)
     private AccountStatus status; // 계정상태
 
-    public Employee(Branch branch, String name, String rrn, String position, String phone, String email, String address, LocalDate hireDate, LocalDate retireDate, Role role, AccountStatus status) {
+    public Employee(Branch branch, String name, String password, String rrn, String position, String phone, String email, String address, LocalDate hireDate, LocalDate retireDate, Role role, AccountStatus status) {
         this.branch = branch;
         this.name = name;
+        this.password = password;
         this.rrn = rrn;
         this.position = position;
         this.phone = phone;
