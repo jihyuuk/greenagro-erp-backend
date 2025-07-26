@@ -3,6 +3,7 @@ package erp.greenagro.greenagro_erp_backend.service;
 import erp.greenagro.greenagro_erp_backend.dto.employee.CreateEmployeeRequest;
 import erp.greenagro.greenagro_erp_backend.dto.employee.CreateEmployeeResponse;
 import erp.greenagro.greenagro_erp_backend.dto.employee.EmployeeResponse;
+import erp.greenagro.greenagro_erp_backend.dto.employee.ResignEmployeeRequest;
 import erp.greenagro.greenagro_erp_backend.mapper.EmployeeMapper;
 import erp.greenagro.greenagro_erp_backend.model.entity.Branch;
 import erp.greenagro.greenagro_erp_backend.model.entity.Employee;
@@ -53,6 +54,7 @@ public class EmployeeService {
 
 
     //직원 단건 조회
+    @Transactional
     public EmployeeResponse getEmployeeById(Long id){
         //직원 단건 조회
         Employee employee = employeeRepository.findById(id)
@@ -64,11 +66,24 @@ public class EmployeeService {
 
 
     //모든 직원 조회
+    @Transactional
     public List<EmployeeResponse> getAllEmployees(){
         //모든 직원 조회
         List<Employee> employeeList = employeeRepository.findAll();
         //dto 변환하여 반환
         return employeeList.stream().map(employeeMapper::toResponse).toList();
+    }
+
+
+    //직원 퇴사 처리
+    @Transactional
+    public void resignEmployee(Long id, ResignEmployeeRequest request){
+        //직원 조회
+        Employee employee = employeeRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 직원번호 입니다."));
+
+        //직원 계정 상태 변경
+        employee.resign(request.getResignDate());
     }
 
 }

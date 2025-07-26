@@ -3,6 +3,7 @@ package erp.greenagro.greenagro_erp_backend.controller;
 import erp.greenagro.greenagro_erp_backend.dto.employee.CreateEmployeeRequest;
 import erp.greenagro.greenagro_erp_backend.dto.employee.CreateEmployeeResponse;
 import erp.greenagro.greenagro_erp_backend.dto.employee.EmployeeResponse;
+import erp.greenagro.greenagro_erp_backend.dto.employee.ResignEmployeeRequest;
 import erp.greenagro.greenagro_erp_backend.service.EmployeeService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -25,6 +26,15 @@ public class EmployeeController {
         return ResponseEntity.status(CREATED).body(response);
     }
 
+
+    //모든 직원 조회(퇴사자 포함)
+    @GetMapping("/employees")
+    public ResponseEntity<List<EmployeeResponse>> getAllEmployee(){
+        List<EmployeeResponse> allEmployees = employeeService.getAllEmployees();
+        return ResponseEntity.ok(allEmployees);
+    }
+
+
     //직원 단건 조회
     @GetMapping("/employees/{id}")
     public ResponseEntity<EmployeeResponse> getEmployee(@PathVariable Long id){
@@ -32,11 +42,12 @@ public class EmployeeController {
         return ResponseEntity.ok(response);
     }
 
-    //모든 직원 조회(퇴사자 포함)
-    @GetMapping("/employees")
-    public ResponseEntity<List<EmployeeResponse>> getAllEmployee(){
-        List<EmployeeResponse> allEmployees = employeeService.getAllEmployees();
-        return ResponseEntity.ok(allEmployees);
+
+    //직원 퇴사 처리
+    @PatchMapping("/employees/{id}/resign")
+    public ResponseEntity<Void> resignEmployee(@PathVariable Long id, @RequestBody ResignEmployeeRequest request){
+        employeeService.resignEmployee(id, request);
+        return ResponseEntity.noContent().build();
     }
 
 }

@@ -59,4 +59,13 @@ public class Employee {
         this.role = role;
         this.status = status;
     }
+
+
+    //직원 퇴사처리
+    public void resign(LocalDate resignDate){
+        //계정 상태 변경
+        this.status = AccountStatus.RESIGNED;
+        //퇴사일 적용
+        this.resignDate = resignDate == null ? LocalDate.now() : resignDate;//null 방지
+    }
 }
