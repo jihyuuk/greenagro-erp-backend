@@ -15,7 +15,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 
 @Service
@@ -50,6 +49,17 @@ public class EmployeeService {
 
         //response 반환
         return employeeMapper.toResponse(employee, tempPwd);
+    }
+
+
+    //직원 단건 조회
+    public EmployeeResponse getEmployeeById(Long id){
+        //직원 단건 조회
+        Employee employee = employeeRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 직원번호 입니다."));
+
+        //DTO 변환
+        return employeeMapper.toResponse(employee);
     }
 
 

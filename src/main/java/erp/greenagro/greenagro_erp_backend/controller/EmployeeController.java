@@ -6,10 +6,7 @@ import erp.greenagro.greenagro_erp_backend.dto.employee.EmployeeResponse;
 import erp.greenagro.greenagro_erp_backend.service.EmployeeService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -26,6 +23,13 @@ public class EmployeeController {
     public ResponseEntity<CreateEmployeeResponse> createEmployee(@RequestBody CreateEmployeeRequest request){
         CreateEmployeeResponse response = employeeService.createEmployee(request);
         return ResponseEntity.status(CREATED).body(response);
+    }
+
+    //직원 단건 조회
+    @GetMapping("/employees/{id}")
+    public ResponseEntity<EmployeeResponse> getEmployee(@PathVariable Long id){
+        EmployeeResponse response = employeeService.getEmployeeById(id);
+        return ResponseEntity.ok(response);
     }
 
     //모든 직원 조회(퇴사자 포함)
