@@ -2,8 +2,8 @@ package erp.greenagro.greenagro_erp_backend.model.enums;
 
 public enum AccountStatus {
 
-    ACTIVE,     // 정상 활동
-    SUSPENDED,  // 정지
-    TERMINATED  // 퇴사자
+    ACTIVE,     // 재직 중
+    ON_LEAVE,   // 휴직
+    RESIGNED    // 퇴사
 
 }
