@@ -13,12 +13,12 @@ public class EmployeeMapper {
     /**
      * CreateEmployeeRequest ===> Employee 엔티티로 변환합니다.
      */
-    public Employee toEntity(CreateEmployeeRequest request, Branch branch, String hashedPwd, String encryptRrn){
+    public Employee toEntity(CreateEmployeeRequest request, Branch branch, String hashedPwd, String encryptedRrn){
         return new Employee(
                 branch,                 // 지점
                 request.getName(),      // 이름
                 hashedPwd,              // 비밀번호
-                encryptRrn,             // 주민번호
+                encryptedRrn,             // 주민번호
                 request.getPosition(),  // 직위
                 request.getPhone(),     // 핸드폰
                 request.getEmail(),     // 이메일
@@ -28,7 +28,7 @@ public class EmployeeMapper {
                 AccountStatus.ACTIVE    // 계정상태 활성화
         );
     }
-    
+
 
     /**
      * Employee 엔티티 ===> CreateEmployeeResponse DTO 로 변환합니다.
