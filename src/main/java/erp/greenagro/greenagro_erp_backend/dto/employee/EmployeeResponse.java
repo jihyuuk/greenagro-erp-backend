@@ -22,7 +22,7 @@ public class EmployeeResponse {
     private String phone; //전화번호
     private String email; //이메일
     private LocalDate hireDate; //입사일자
-    private LocalDate retireDate; //퇴사일자
+    private LocalDate resignDate; //퇴사일자
     private Role role; //권한
     private AccountStatus accountStatus; //계정상태
 

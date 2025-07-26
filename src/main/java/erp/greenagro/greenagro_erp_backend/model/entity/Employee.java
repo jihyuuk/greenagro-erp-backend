@@ -37,7 +37,7 @@ public class Employee {
 
     private LocalDate hireDate; //입사일자
 
-    private LocalDate retireDate; //퇴사일자
+    private LocalDate resignDate; //퇴사일자
 
     @Enumerated(EnumType.STRING)
     private Role role; //권한

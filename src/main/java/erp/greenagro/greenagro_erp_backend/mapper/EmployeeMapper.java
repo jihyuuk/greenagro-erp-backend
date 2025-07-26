@@ -48,7 +48,7 @@ public class EmployeeMapper {
                 employee.getPhone(),            // 핸드폰
                 employee.getEmail(),            // 이메일
                 employee.getHireDate(),         // 입사일자
-                employee.getRetireDate(),       // 입사일자
+                employee.getResignDate(),       // 입사일자
                 employee.getRole(),             // 권한
                 employee.getStatus()            // 계정상태 활성화
         );
