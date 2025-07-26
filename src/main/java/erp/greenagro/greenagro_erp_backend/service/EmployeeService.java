@@ -2,6 +2,7 @@ package erp.greenagro.greenagro_erp_backend.service;
 
 import erp.greenagro.greenagro_erp_backend.dto.employee.CreateEmployeeRequest;
 import erp.greenagro.greenagro_erp_backend.dto.employee.CreateEmployeeResponse;
+import erp.greenagro.greenagro_erp_backend.dto.employee.EmployeeResponse;
 import erp.greenagro.greenagro_erp_backend.mapper.EmployeeMapper;
 import erp.greenagro.greenagro_erp_backend.model.entity.Branch;
 import erp.greenagro.greenagro_erp_backend.model.entity.Employee;
@@ -12,6 +13,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 
 @Service
@@ -48,5 +52,13 @@ public class EmployeeService {
         return employeeMapper.toResponse(employee, tempPwd);
     }
 
+
+    //모든 직원 조회
+    public List<EmployeeResponse> getAllEmployees(){
+        //모든 직원 조회
+        List<Employee> employeeList = employeeRepository.findAll();
+        //dto 변환하여 반환
+        return employeeList.stream().map(employeeMapper::toResponse).toList();
+    }
 
 }
