@@ -2,7 +2,7 @@ package erp.greenagro.greenagro_erp_backend.mapper;
 
 import erp.greenagro.greenagro_erp_backend.dto.employee.CreateEmployeeRequest;
 import erp.greenagro.greenagro_erp_backend.dto.employee.CreateEmployeeResponse;
-import erp.greenagro.greenagro_erp_backend.dto.employee.EmployeeResponse;
+import erp.greenagro.greenagro_erp_backend.dto.employee.EmployeeSummaryResponse;
 import erp.greenagro.greenagro_erp_backend.model.entity.Branch;
 import erp.greenagro.greenagro_erp_backend.model.entity.Employee;
 import erp.greenagro.greenagro_erp_backend.model.enums.AccountStatus;
@@ -38,19 +38,15 @@ public class EmployeeMapper {
         return new CreateEmployeeResponse(employee.getId(), tempPwd);
     }
 
-    public EmployeeResponse toResponse(Employee employee) {
-        return new EmployeeResponse(
+    public EmployeeSummaryResponse toResponse(Employee employee) {
+        return new EmployeeSummaryResponse(
                 employee.getId(),               //직원번호
                 employee.getBranch().getId(),   // 지점번호
                 employee.getBranch().getName(), // 지점명
                 employee.getName(),             // 이름
                 employee.getPosition(),         // 직위
                 employee.getPhone(),            // 핸드폰
-                employee.getEmail(),            // 이메일
-                employee.getHireDate(),         // 입사일자
-                employee.getResignDate(),       // 입사일자
-                employee.getRole(),             // 권한
-                employee.getStatus()            // 계정상태 활성화
+                employee.getEmail()             // 이메일
         );
     }
 
