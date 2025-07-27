@@ -1,5 +1,6 @@
 package erp.greenagro.greenagro_erp_backend.mapper;
 
+import erp.greenagro.greenagro_erp_backend.dto.branch.BranchSummaryResponse;
 import erp.greenagro.greenagro_erp_backend.dto.employee.CreateEmployeeRequest;
 import erp.greenagro.greenagro_erp_backend.dto.employee.CreateEmployeeResponse;
 import erp.greenagro.greenagro_erp_backend.dto.employee.EmployeeSummaryResponse;
@@ -39,10 +40,15 @@ public class EmployeeMapper {
     }
 
     public EmployeeSummaryResponse toResponse(Employee employee) {
+
+        //Branch => branchSummaryResponse 매핑
+        //  (굳이 BranchMapper 만들지 말고 여기서 처리함)
+        Branch branch = employee.getBranch();
+        BranchSummaryResponse branchSummaryResponse = new BranchSummaryResponse(branch.getId(), branch.getName());
+
         return new EmployeeSummaryResponse(
                 employee.getId(),               //직원번호
-                employee.getBranch().getId(),   // 지점번호
-                employee.getBranch().getName(), // 지점명
+                branchSummaryResponse,          // 지점(지점번호, 지점명)
                 employee.getName(),             // 이름
                 employee.getPosition(),         // 직위
                 employee.getPhone(),            // 핸드폰

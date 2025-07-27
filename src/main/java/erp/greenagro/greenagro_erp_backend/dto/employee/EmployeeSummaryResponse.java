@@ -1,5 +1,6 @@
 package erp.greenagro.greenagro_erp_backend.dto.employee;
 
+import erp.greenagro.greenagro_erp_backend.dto.branch.BranchSummaryResponse;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
@@ -9,8 +10,7 @@ import lombok.Getter;
 public class EmployeeSummaryResponse {
 
     private Long id; //직원번호
-    private Long branchId; //지점번호
-    private String branchName; //지점명
+    private BranchSummaryResponse branch; // 지점 (지점번호, 지점명)
     private String name; //이름
     private String position; //직위
     private String phone; //전화번호
