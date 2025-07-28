@@ -13,10 +13,6 @@ public class PayInfo {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "employee_id")
-    private Employee employee; // 직원
-
     private String bankName; // 은행
 
     private String accountNumber; //계좌번호
@@ -25,4 +21,10 @@ public class PayInfo {
 
     private Long baseSalary; //기본급
 
+    public PayInfo(String bankName, String accountNumber, String depositorName, Long baseSalary) {
+        this.bankName = bankName;
+        this.accountNumber = accountNumber;
+        this.depositorName = depositorName;
+        this.baseSalary = baseSalary;
+    }
 }

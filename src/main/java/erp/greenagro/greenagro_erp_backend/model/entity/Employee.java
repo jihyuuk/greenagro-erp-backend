@@ -45,8 +45,12 @@ public class Employee {
     @Enumerated(EnumType.STRING)
     private AccountStatus status; // 계정상태
 
+    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @JoinColumn(name = "pay_info_id")
+    private PayInfo payInfo;
+
     //신규 직원 등록용 생성자
-    public Employee(Branch branch, String name, String password, String rrn, String position, String phone, String email, String address, LocalDate hireDate, Role role, AccountStatus status) {
+    public Employee(Branch branch, String name, String password, String rrn, String position, String phone, String email, String address, LocalDate hireDate, Role role, AccountStatus status, PayInfo payInfo) {
         this.branch = branch;
         this.name = name;
         this.password = password;
@@ -58,6 +62,7 @@ public class Employee {
         this.hireDate = hireDate;
         this.role = role;
         this.status = status;
+        this.payInfo = payInfo;
     }
 
 
