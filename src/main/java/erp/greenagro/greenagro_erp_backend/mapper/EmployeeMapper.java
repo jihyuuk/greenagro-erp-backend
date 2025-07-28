@@ -1,17 +1,17 @@
 package erp.greenagro.greenagro_erp_backend.mapper;
 
 import erp.greenagro.greenagro_erp_backend.dto.branch.BranchSummaryResponse;
-import erp.greenagro.greenagro_erp_backend.dto.employee.CreateEmployeeRequest;
-import erp.greenagro.greenagro_erp_backend.dto.employee.CreateEmployeeResponse;
-import erp.greenagro.greenagro_erp_backend.dto.employee.EmployeeDetailResponse;
-import erp.greenagro.greenagro_erp_backend.dto.employee.EmployeeSummaryResponse;
+import erp.greenagro.greenagro_erp_backend.dto.employee.*;
 import erp.greenagro.greenagro_erp_backend.dto.payinfo.PayInfoDTO;
 import erp.greenagro.greenagro_erp_backend.model.entity.Branch;
 import erp.greenagro.greenagro_erp_backend.model.entity.Employee;
 import erp.greenagro.greenagro_erp_backend.model.entity.PayInfo;
 import erp.greenagro.greenagro_erp_backend.model.enums.AccountStatus;
+import erp.greenagro.greenagro_erp_backend.model.enums.Role;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
+
+import java.util.List;
 
 @Component
 @RequiredArgsConstructor
@@ -77,4 +77,12 @@ public class EmployeeMapper {
         );
     }
 
+    public EmployeeEditResponse toEdit(EmployeeDetailResponse employeeDetail, List<BranchSummaryResponse> branchSummaryResponses, List<Role> roles, List<AccountStatus> accountStatuses) {
+        return new EmployeeEditResponse(
+                employeeDetail,
+                branchSummaryResponses,
+                roles,
+                accountStatuses
+        );
+    }
 }

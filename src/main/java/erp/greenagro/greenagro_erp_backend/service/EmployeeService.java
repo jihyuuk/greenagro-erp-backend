@@ -9,6 +9,8 @@ import erp.greenagro.greenagro_erp_backend.mapper.PayInfoMapper;
 import erp.greenagro.greenagro_erp_backend.model.entity.Branch;
 import erp.greenagro.greenagro_erp_backend.model.entity.Employee;
 import erp.greenagro.greenagro_erp_backend.model.entity.PayInfo;
+import erp.greenagro.greenagro_erp_backend.model.enums.AccountStatus;
+import erp.greenagro.greenagro_erp_backend.model.enums.Role;
 import erp.greenagro.greenagro_erp_backend.repository.BranchRepository;
 import erp.greenagro.greenagro_erp_backend.repository.EmployeeRepository;
 import erp.greenagro.greenagro_erp_backend.util.SecurityUtil;
@@ -17,6 +19,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Arrays;
 import java.util.List;
 
 
@@ -61,7 +64,7 @@ public class EmployeeService {
 
 
     //직원 상세 조회
-    @Transactional
+    @Transactional(readOnly = true)
     public EmployeeDetailResponse getEmployeeDetail(Long id){
         //직원 조회
         Employee employee = employeeRepository.findById(id)
@@ -82,7 +85,7 @@ public class EmployeeService {
 
 
     //모든 직원 조회
-    @Transactional
+    @Transactional(readOnly = true)
     public List<EmployeeSummaryResponse> getAllEmployees(){
         //모든 직원 조회
         List<Employee> employeeList = employeeRepository.findAll();
@@ -93,6 +96,25 @@ public class EmployeeService {
             BranchSummaryResponse branchSummaryResponse = branchMapper.toResponse(employee.getBranch());
             return employeeMapper.toSummary(employee, branchSummaryResponse);
         }).toList();
+    }
+
+    //직원 수정 관련 필요 데이터
+    @Transactional(readOnly = true)
+    public EmployeeEditResponse getEmployeeEdit(Long id){
+
+        //직원 상세 dto
+        EmployeeDetailResponse employeeDetail = getEmployeeDetail(id);
+
+        //지점 옵션
+        List<BranchSummaryResponse> branchSummaryResponses = branchRepository.findAll().stream().map(branchMapper::toResponse).toList();
+
+        //권한 옵션
+        List<Role> roles = Arrays.asList(Role.values());
+
+        //계정상태 옵션
+        List<AccountStatus> accountStatuses = Arrays.asList(AccountStatus.values());
+
+        return employeeMapper.toEdit(employeeDetail, branchSummaryResponses, roles, accountStatuses);
     }
 
 

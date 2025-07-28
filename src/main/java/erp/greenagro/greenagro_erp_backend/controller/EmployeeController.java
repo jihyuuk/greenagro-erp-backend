@@ -39,6 +39,13 @@ public class EmployeeController {
         return ResponseEntity.ok(response);
     }
 
+    //직원 수정 폼 데이터
+    @GetMapping("/employees/{id}/edit")
+    public ResponseEntity<EmployeeEditResponse> getEditData(@PathVariable Long id){
+        EmployeeEditResponse response = employeeService.getEmployeeEdit(id);
+        return ResponseEntity.ok(response);
+    }
+
 
     //직원 퇴사 처리
     @PatchMapping("/employees/{id}/resign")
