@@ -17,12 +17,11 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class EmployeeMapper {
 
-    private final BranchMapper branchMapper;
 
     /**
      * CreateEmployeeRequest ===> Employee 엔티티로 변환합니다.
      */
-    public Employee toEntity(CreateEmployeeRequest request, Branch branch, PayInfo payInfo, String hashedPwd, String encryptedRrn) {
+    public Employee fromCreate(CreateEmployeeRequest request, Branch branch, PayInfo payInfo, String hashedPwd, String encryptedRrn) {
         return new Employee(
                 branch,                 // 지점
                 request.getName(),      // 이름
@@ -43,14 +42,11 @@ public class EmployeeMapper {
     /**
      * Employee 엔티티 ===> CreateEmployeeResponse DTO 로 변환합니다.
      */
-    public CreateEmployeeResponse toResponse(Employee employee, String tempPwd) {
+    public CreateEmployeeResponse toCreate(Employee employee, String tempPwd) {
         return new CreateEmployeeResponse(employee.getId(), tempPwd);
     }
 
-    public EmployeeSummaryResponse toResponse(Employee employee) {
-
-        //지점정보 요약
-        BranchSummaryResponse branchSummaryResponse = branchMapper.toResponse(employee.getBranch());
+    public EmployeeSummaryResponse toSummary(Employee employee, BranchSummaryResponse branchSummaryResponse) {
 
         return new EmployeeSummaryResponse(
                 employee.getId(),               //직원번호
@@ -62,16 +58,13 @@ public class EmployeeMapper {
         );
     }
 
-    public EmployeeDetailResponse toResponse(Employee employee, PayInfoDTO payInfoDTO){
-
-        //지점정보 요약
-        BranchSummaryResponse branchSummaryResponse = branchMapper.toResponse(employee.getBranch());
+    public EmployeeDetailResponse toDetail(Employee employee, String decryptRrn, BranchSummaryResponse branchSummaryResponse, PayInfoDTO payInfoDTO){
 
         return new EmployeeDetailResponse(
                 employee.getId(),               //직원번호
                 branchSummaryResponse,          //지점(지점번호, 지점명)
                 employee.getName(),             //이름
-                employee.getRrn(),              //주민등록번호
+                decryptRrn,                     //주민등록번호
                 employee.getPosition(),         //직위
                 employee.getPhone(),            //핸드폰
                 employee.getEmail(),            //이메일

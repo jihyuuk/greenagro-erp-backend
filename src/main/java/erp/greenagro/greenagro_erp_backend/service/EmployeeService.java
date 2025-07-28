@@ -1,7 +1,9 @@
 package erp.greenagro.greenagro_erp_backend.service;
 
+import erp.greenagro.greenagro_erp_backend.dto.branch.BranchSummaryResponse;
 import erp.greenagro.greenagro_erp_backend.dto.employee.*;
 import erp.greenagro.greenagro_erp_backend.dto.payinfo.PayInfoDTO;
+import erp.greenagro.greenagro_erp_backend.mapper.BranchMapper;
 import erp.greenagro.greenagro_erp_backend.mapper.EmployeeMapper;
 import erp.greenagro.greenagro_erp_backend.mapper.PayInfoMapper;
 import erp.greenagro.greenagro_erp_backend.model.entity.Branch;
@@ -9,11 +11,9 @@ import erp.greenagro.greenagro_erp_backend.model.entity.Employee;
 import erp.greenagro.greenagro_erp_backend.model.entity.PayInfo;
 import erp.greenagro.greenagro_erp_backend.repository.BranchRepository;
 import erp.greenagro.greenagro_erp_backend.repository.EmployeeRepository;
-import erp.greenagro.greenagro_erp_backend.repository.PayInfoRepository;
 import erp.greenagro.greenagro_erp_backend.util.SecurityUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.stereotype.Repository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -26,8 +26,8 @@ public class EmployeeService {
 
     private final EmployeeRepository employeeRepository;
     private final BranchRepository branchRepository;
-    private final PayInfoRepository payInfoRepository;
     private final EmployeeMapper employeeMapper;
+    private final BranchMapper branchMapper;
     private final PayInfoMapper payInfoMapper;
 
 
@@ -50,13 +50,13 @@ public class EmployeeService {
         String encryptedRrn = SecurityUtil.encryptRrn(request.getRrn());
 
         //employee 객체 생성
-        Employee employee = employeeMapper.toEntity(request, branch, payInfo, hashedPwd, encryptedRrn);
+        Employee employee = employeeMapper.fromCreate(request, branch, payInfo, hashedPwd, encryptedRrn);
 
         //저장
         employeeRepository.save(employee);
 
         //response 반환
-        return employeeMapper.toResponse(employee, tempPwd);
+        return employeeMapper.toCreate(employee, tempPwd);
     }
 
 
@@ -67,12 +67,17 @@ public class EmployeeService {
         Employee employee = employeeRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 직원번호 입니다."));
 
-        //지점정보
+        //주민등록번호 복호화
+        String decryptRrn = SecurityUtil.decryptRrn(employee.getRrn());
 
-        //급여정보
+        //지점정보 DTO
+        BranchSummaryResponse branchSummaryResponse = branchMapper.toResponse(employee.getBranch());
+
+        //급여정보 DTO
         PayInfoDTO payInfoDTO = payInfoMapper.toResponse(employee.getPayInfo());
 
-        return employeeMapper.toResponse(employee, payInfoDTO);
+        //response 반환
+        return employeeMapper.toDetail(employee, decryptRrn, branchSummaryResponse, payInfoDTO);
     }
 
 
@@ -81,8 +86,13 @@ public class EmployeeService {
     public List<EmployeeSummaryResponse> getAllEmployees(){
         //모든 직원 조회
         List<Employee> employeeList = employeeRepository.findAll();
-        //dto 변환하여 반환
-        return employeeList.stream().map(employeeMapper::toResponse).toList();
+
+        //dto 변환
+        return employeeList.stream().map(employee -> {
+            //지점 요약 dto
+            BranchSummaryResponse branchSummaryResponse = branchMapper.toResponse(employee.getBranch());
+            return employeeMapper.toSummary(employee, branchSummaryResponse);
+        }).toList();
     }
 
 
