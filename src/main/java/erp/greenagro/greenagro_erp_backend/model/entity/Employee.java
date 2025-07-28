@@ -66,6 +66,23 @@ public class Employee {
     }
 
 
+    //직원 업데이트
+    //UpdateEmployeeCommand 고려해봐야함 파라미터가 너무 많음
+    public void update(Branch branch, String name, String rrn, String position, String phone, String email, String address, LocalDate hireDate, LocalDate resignDate, Role role, AccountStatus status) {
+        this.branch = branch;
+        this.name = name;
+        this.rrn = rrn;
+        this.position = position;
+        this.phone = phone;
+        this.email = email;
+        this.address = address;
+        this.hireDate = hireDate;
+        this.resignDate = resignDate;
+        this.role = role;
+        this.status = status;
+    }
+
+
     //직원 퇴사처리
     public void resign(LocalDate resignDate){
         //계정 상태 변경

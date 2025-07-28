@@ -21,6 +21,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
 
 @Service
@@ -115,6 +116,30 @@ public class EmployeeService {
         List<AccountStatus> accountStatuses = Arrays.asList(AccountStatus.values());
 
         return employeeMapper.toEdit(employeeDetail, branchSummaryResponses, roles, accountStatuses);
+    }
+
+    //직원 업데이트
+    @Transactional
+    public void updateEmployee(Long id, UpdateEmployeeRequest request) {
+        //직원 조회
+        Employee employee = employeeRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 직원번호 입니다."));
+
+        //지점 조회하기
+        Branch branch = branchRepository.findById(request.getBranchId())
+                .orElseThrow(() -> new IllegalArgumentException("지점이 존재하지 않습니다."));
+
+        //급여정보 조회하기
+        PayInfo payInfo = employee.getPayInfo();
+
+        //주민번호 암호화
+        String encryptedRrn = SecurityUtil.encryptRrn(request.getRrn());
+
+        //직원 업데이트
+        employee.update(branch, request.getName(), encryptedRrn, request.getPosition(), request.getPhone(), request.getEmail(), request.getAddress(), request.getHireDate(), request.getResignDate(), request.getRole(), request.getStatus());
+        //급여정보 업데이트
+        PayInfoDTO updatePayInfo = request.getPayInfo();
+        payInfo.update(updatePayInfo.getBankName(), updatePayInfo.getAccountNumber(), updatePayInfo.getDepositorName(), updatePayInfo.getBaseSalary());
     }
 
 

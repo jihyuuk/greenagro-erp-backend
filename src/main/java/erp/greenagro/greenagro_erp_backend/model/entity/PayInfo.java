@@ -27,4 +27,11 @@ public class PayInfo {
         this.depositorName = depositorName;
         this.baseSalary = baseSalary;
     }
+
+    public void update(String bankName, String accountNumber, String depositorName, Long baseSalary) {
+        this.bankName = bankName;
+        this.accountNumber = accountNumber;
+        this.depositorName = depositorName;
+        this.baseSalary = baseSalary;
+    }
 }

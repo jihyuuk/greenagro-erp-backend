@@ -46,6 +46,13 @@ public class EmployeeController {
         return ResponseEntity.ok(response);
     }
 
+    //직원 업데이트
+    @PutMapping("/employees/{id}")
+    public ResponseEntity<Void> updateEmployee(@PathVariable Long id, @RequestBody UpdateEmployeeRequest request){
+        employeeService.updateEmployee(id, request);
+        return ResponseEntity.noContent().build();
+    }
+
 
     //직원 퇴사 처리
     @PatchMapping("/employees/{id}/resign")
