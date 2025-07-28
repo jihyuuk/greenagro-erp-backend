@@ -1,5 +1,6 @@
 package erp.greenagro.greenagro_erp_backend.dto.employee;
 
+import erp.greenagro.greenagro_erp_backend.dto.payinfo.PayInfoDTO;
 import erp.greenagro.greenagro_erp_backend.model.enums.Role;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -23,5 +24,7 @@ public class CreateEmployeeRequest {
 
     @Enumerated(EnumType.STRING)
     private Role role; //권한
+
+    private PayInfoDTO payInfo; //급여정보(은행,계좌,예금주,기본급)
 
 }
