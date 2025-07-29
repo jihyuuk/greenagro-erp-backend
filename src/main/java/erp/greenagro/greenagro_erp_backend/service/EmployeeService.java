@@ -21,7 +21,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.Optional;
 
 
 @Service
@@ -46,7 +45,7 @@ public class EmployeeService {
         PayInfo payInfo = payInfoMapper.toEntity(request.getPayInfo());
 
         //임시 비밀번호 생성
-        String tempPwd = SecurityUtil.generateTempPassword(4); //4자리 랜덤 숫자
+        String tempPwd = SecurityUtil.generateTempPassword(); //8자리 랜덤 비밀번호
         //비밀번호 해시화
         String hashedPwd = new BCryptPasswordEncoder().encode(tempPwd);
 
@@ -163,7 +162,7 @@ public class EmployeeService {
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 직원번호 입니다."));
 
         //임시 비밀번호 생성
-        String tempPwd = SecurityUtil.generateTempPassword(4); //4자리 랜덤 숫자
+        String tempPwd = SecurityUtil.generateTempPassword(); //8자리 랜덤 비밀번호
 
         //비밀번호 해시화
         String hashedPwd = new BCryptPasswordEncoder().encode(tempPwd);

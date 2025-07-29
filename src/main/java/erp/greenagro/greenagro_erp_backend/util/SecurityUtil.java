@@ -2,32 +2,17 @@ package erp.greenagro.greenagro_erp_backend.util;
 
 import javax.crypto.Cipher;
 import javax.crypto.spec.SecretKeySpec;
-import java.security.SecureRandom;
 import java.util.Base64;
+import java.util.UUID;
 
 public class SecurityUtil {
 
-    private static final SecureRandom secureRandom = new SecureRandom();
-
     /**
      * 임시 비밀번호 랜덤 생성
-     * @param length 생성할 자리수 (1 ~ 10자리)
-     * @return 숫자로만 구성된 임시 비밀번호
+     * @return 8자리 랜덤 임시비밀번호
      */
-    public static String generateTempPassword(int length){
-        //범위 판별
-        if(length <= 0 || length >10){
-            throw new IllegalArgumentException("임시 비밀번호는 1 ~ 10 자리여야 합니다.");
-        }
-
-        //생성
-        StringBuilder sb = new StringBuilder();
-
-        for (int i = 0; i < length; i++) {
-            sb.append(secureRandom.nextInt(10)); //0~9까지
-        }
-
-        return sb.toString();
+    public static String generateTempPassword(){
+        return UUID.randomUUID().toString().substring(0, 8);
     }
 
 
