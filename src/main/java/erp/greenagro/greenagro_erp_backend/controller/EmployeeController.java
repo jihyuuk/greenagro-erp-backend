@@ -19,7 +19,7 @@ public class EmployeeController {
     private final EmployeeService employeeService;
 
     //직원 등록
-    @PostMapping("/employees/new")
+    @PostMapping("/employees")
     public ResponseEntity<CreateEmployeeResponse> createEmployee(@RequestBody CreateEmployeeRequest request){
         CreateEmployeeResponse response = employeeService.createEmployee(request);
         return ResponseEntity.status(CREATED).body(response);
@@ -42,7 +42,7 @@ public class EmployeeController {
     }
 
     //직원 수정 폼 데이터
-    @GetMapping("/employees/{id}/edit")
+    @GetMapping("/employees/{id}/edit-data")
     public ResponseEntity<EmployeeEditResponse> getEditData(@PathVariable Long id){
         EmployeeEditResponse response = employeeService.getEmployeeEdit(id);
         return ResponseEntity.ok(response);
