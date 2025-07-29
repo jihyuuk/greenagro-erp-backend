@@ -47,7 +47,9 @@ public class Employee {
 
     @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @JoinColumn(name = "pay_info_id")
-    private PayInfo payInfo;
+    private PayInfo payInfo; // 급여정보
+
+    private Boolean mustChangePassword; // 비밀번호 변경 필요 여부
 
     //신규 직원 등록용 생성자
     public Employee(Branch branch, String name, String password, String rrn, String position, String phone, String email, String address, LocalDate hireDate, Role role, AccountStatus status, PayInfo payInfo) {
@@ -63,6 +65,7 @@ public class Employee {
         this.role = role;
         this.status = status;
         this.payInfo = payInfo;
+        this.mustChangePassword = true;
     }
 
 
@@ -89,5 +92,11 @@ public class Employee {
         this.status = AccountStatus.RESIGNED;
         //퇴사일 적용
         this.resignDate = resignDate == null ? LocalDate.now() : resignDate;//null 방지
+    }
+
+    //직원 비밀번호 초기화
+    public void resetPassword(String hashedPwd) {
+        this.password = hashedPwd;
+        this.mustChangePassword = true;
     }
 }
