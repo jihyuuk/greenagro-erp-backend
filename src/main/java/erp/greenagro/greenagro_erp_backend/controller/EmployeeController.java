@@ -44,7 +44,7 @@ public class EmployeeController {
     //직원 수정 폼 데이터
     @GetMapping("/employees/{id}/edit-data")
     public ResponseEntity<EmployeeEditResponse> getEditData(@PathVariable Long id){
-        EmployeeEditResponse response = employeeService.getEmployeeEdit(id);
+        EmployeeEditResponse response = employeeService.getEmployeeEditData(id);
         return ResponseEntity.ok(response);
     }
 

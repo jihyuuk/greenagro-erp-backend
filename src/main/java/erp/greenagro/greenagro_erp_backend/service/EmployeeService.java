@@ -111,7 +111,7 @@ public class EmployeeService {
 
     //직원 수정 관련 필요 데이터
     @Transactional(readOnly = true)
-    public EmployeeEditResponse getEmployeeEdit(Long id){
+    public EmployeeEditResponse getEmployeeEditData(Long id){
 
         //직원 상세 dto
         EmployeeDetailResponse employeeDetail = getEmployeeDetail(id);
