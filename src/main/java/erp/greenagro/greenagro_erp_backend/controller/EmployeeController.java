@@ -1,12 +1,14 @@
 package erp.greenagro.greenagro_erp_backend.controller;
 
 import erp.greenagro.greenagro_erp_backend.dto.employee.*;
+import erp.greenagro.greenagro_erp_backend.model.enums.AccountStatus;
 import erp.greenagro.greenagro_erp_backend.service.EmployeeService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 import static org.springframework.http.HttpStatus.*;
 
@@ -24,10 +26,10 @@ public class EmployeeController {
     }
 
 
-    //모든 직원 조회(퇴사자 포함)
+    //모든 직원 조회(계정 상태 별로 그룹화)
     @GetMapping("/employees")
-    public ResponseEntity<List<EmployeeSummaryResponse>> getAllEmployee(){
-        List<EmployeeSummaryResponse> allEmployees = employeeService.getAllEmployees();
+    public ResponseEntity<Map<AccountStatus, List<EmployeeSummaryResponse>>> getAllEmployee(){
+        Map<AccountStatus, List<EmployeeSummaryResponse>> allEmployees = employeeService.getAllEmployees();
         return ResponseEntity.ok(allEmployees);
     }
 

@@ -19,8 +19,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 
 
 @Service
@@ -86,16 +85,32 @@ public class EmployeeService {
 
     //모든 직원 조회
     @Transactional(readOnly = true)
-    public List<EmployeeSummaryResponse> getAllEmployees(){
+    public Map<AccountStatus, List<EmployeeSummaryResponse>> getAllEmployees(){
+
+        //계정 상태별로 그룹화
+        Map<AccountStatus, List<EmployeeSummaryResponse>> employeesMap = new HashMap<>();
+
+        //employeesMap 초기화
+        for (AccountStatus status : AccountStatus.values()) {
+            employeesMap.put(status, new ArrayList<>());
+        }
+
         //모든 직원 조회
         List<Employee> employeeList = employeeRepository.findAll();
 
-        //dto 변환
-        return employeeList.stream().map(employee -> {
+        //dto 변환 및 상태별로 그룹화
+        for (Employee employee : employeeList) {
             //지점 요약 dto
             BranchSummaryResponse branchSummaryResponse = branchMapper.toResponse(employee.getBranch());
-            return employeeMapper.toSummary(employee, branchSummaryResponse);
-        }).toList();
+            //직원 요약 dto
+            EmployeeSummaryResponse employeeSummaryResponse = employeeMapper.toSummary(employee, branchSummaryResponse);
+
+            //계정상태 그룹별로 map 에 추가
+            employeesMap.get(employee.getStatus()).add(employeeSummaryResponse);
+        }
+
+        //응답
+        return employeesMap;
     }
 
     //직원 수정 관련 필요 데이터
