@@ -154,4 +154,24 @@ public class EmployeeService {
         employee.resign(request.getResignDate());
     }
 
+
+    //직원 비밀번호 초기화
+    @Transactional
+    public ResetPasswordResponse resetPassword(Long id) {
+        //직원 조회
+        Employee employee = employeeRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 직원번호 입니다."));
+
+        //임시 비밀번호 생성
+        String tempPwd = SecurityUtil.generateTempPassword(4); //4자리 랜덤 숫자
+
+        //비밀번호 해시화
+        String hashedPwd = new BCryptPasswordEncoder().encode(tempPwd);
+
+        //직원 비밀번호 초기화
+        employee.resetPassword(hashedPwd);
+
+        //임시비밀번호 반환
+        return new ResetPasswordResponse(tempPwd);
+    }
 }

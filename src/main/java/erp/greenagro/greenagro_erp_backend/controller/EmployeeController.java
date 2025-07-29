@@ -61,4 +61,11 @@ public class EmployeeController {
         return ResponseEntity.noContent().build();
     }
 
+    //직원 비밀번호 초기화
+    @PatchMapping("/employees/{id}/reset-password")
+    public ResponseEntity<ResetPasswordResponse> resetPassword(@PathVariable Long id){
+        ResetPasswordResponse response = employeeService.resetPassword(id);
+        return ResponseEntity.ok(response);
+    }
+
 }
