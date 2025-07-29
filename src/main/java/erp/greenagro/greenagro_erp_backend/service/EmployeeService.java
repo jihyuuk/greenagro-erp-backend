@@ -37,8 +37,7 @@ public class EmployeeService {
     @Transactional
     public CreateEmployeeResponse createEmployee(CreateEmployeeRequest request) {
         //지점 조회하기
-        Branch branch = branchRepository.findById(request.getBranchId())
-                .orElseThrow(() -> new IllegalArgumentException("지점이 존재하지 않습니다."));
+        Branch branch = getBranchOrThrow(request.getBranchId());
 
         //급여정보 객체 생성
         PayInfo payInfo = payInfoMapper.toEntity(request.getPayInfo());
@@ -66,8 +65,7 @@ public class EmployeeService {
     @Transactional(readOnly = true)
     public EmployeeDetailResponse getEmployeeDetail(Long id){
         //직원 조회
-        Employee employee = employeeRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 직원번호 입니다."));
+        Employee employee = getEmployeeOrThrow(id);
 
         //주민등록번호 복호화
         String decryptRrn = SecurityUtil.decryptRrn(employee.getRrn());
@@ -136,12 +134,10 @@ public class EmployeeService {
     @Transactional
     public void updateEmployee(Long id, UpdateEmployeeRequest request) {
         //직원 조회
-        Employee employee = employeeRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 직원번호 입니다."));
+        Employee employee = getEmployeeOrThrow(id);
 
         //지점 조회하기
-        Branch branch = branchRepository.findById(request.getBranchId())
-                .orElseThrow(() -> new IllegalArgumentException("지점이 존재하지 않습니다."));
+        Branch branch = getBranchOrThrow(request.getBranchId());
 
         //급여정보 조회하기
         PayInfo payInfo = employee.getPayInfo();
@@ -161,8 +157,7 @@ public class EmployeeService {
     @Transactional
     public void resignEmployee(Long id, ResignEmployeeRequest request){
         //직원 조회
-        Employee employee = employeeRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 직원번호 입니다."));
+        Employee employee = getEmployeeOrThrow(id);
 
         //직원 퇴사 처리
         employee.resign(request.getResignDate());
@@ -173,8 +168,7 @@ public class EmployeeService {
     @Transactional
     public ResetPasswordResponse resetPassword(Long id) {
         //직원 조회
-        Employee employee = employeeRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 직원번호 입니다."));
+        Employee employee = getEmployeeOrThrow(id);
 
         //임시 비밀번호 생성
         String tempPwd = SecurityUtil.generateTempPassword(); //8자리 랜덤 비밀번호
@@ -187,5 +181,20 @@ public class EmployeeService {
 
         //임시비밀번호 반환
         return new ResetPasswordResponse(tempPwd);
+    }
+
+
+
+
+    //직원 조회 공용 메서드
+    private Employee getEmployeeOrThrow(Long id){
+        return employeeRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 직원 입니다. id="+id));
+    }
+
+    //브랜치 조회 공용 메서드
+    private Branch getBranchOrThrow(Long id) {
+        return branchRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 지점 입니다. id="+id));
     }
 }
