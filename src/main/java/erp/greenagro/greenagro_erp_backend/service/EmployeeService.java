@@ -15,7 +15,6 @@ import erp.greenagro.greenagro_erp_backend.repository.BranchRepository;
 import erp.greenagro.greenagro_erp_backend.repository.EmployeeRepository;
 import erp.greenagro.greenagro_erp_backend.util.SecurityUtil;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -43,21 +42,19 @@ public class EmployeeService {
         PayInfo payInfo = payInfoMapper.toEntity(request.getPayInfo());
 
         //임시 비밀번호 생성
-        String tempPwd = SecurityUtil.generateTempPassword(); //8자리 랜덤 비밀번호
-        //비밀번호 해시화
-        String hashedPwd = new BCryptPasswordEncoder().encode(tempPwd);
+        SecurityUtil.PasswordBundle passwordBundle = SecurityUtil.generateTempPassword();
 
         //주민번호 암호화
         String encryptedRrn = SecurityUtil.encryptRrn(request.getRrn());
 
         //employee 객체 생성
-        Employee employee = employeeMapper.fromCreate(request, branch, payInfo, hashedPwd, encryptedRrn);
+        Employee employee = employeeMapper.fromCreate(request, branch, payInfo, passwordBundle.getHashed(), encryptedRrn);
 
         //저장
         employeeRepository.save(employee);
 
         //response 반환
-        return employeeMapper.toCreate(employee, tempPwd);
+        return employeeMapper.toCreate(employee, passwordBundle.getRaw());
     }
 
 
@@ -111,6 +108,7 @@ public class EmployeeService {
         return employeesMap;
     }
 
+
     //직원 수정 관련 필요 데이터
     @Transactional(readOnly = true)
     public EmployeeEditResponse getEmployeeEdit(Long id){
@@ -129,6 +127,7 @@ public class EmployeeService {
 
         return employeeMapper.toEdit(employeeDetail, branchSummaryResponses, roles, accountStatuses);
     }
+
 
     //직원 업데이트
     @Transactional
@@ -171,16 +170,13 @@ public class EmployeeService {
         Employee employee = getEmployeeOrThrow(id);
 
         //임시 비밀번호 생성
-        String tempPwd = SecurityUtil.generateTempPassword(); //8자리 랜덤 비밀번호
-
-        //비밀번호 해시화
-        String hashedPwd = new BCryptPasswordEncoder().encode(tempPwd);
+        SecurityUtil.PasswordBundle passwordBundle = SecurityUtil.generateTempPassword();
 
         //직원 비밀번호 초기화
-        employee.resetPassword(hashedPwd);
+        employee.resetPassword(passwordBundle.getHashed());
 
         //임시비밀번호 반환
-        return new ResetPasswordResponse(tempPwd);
+        return new ResetPasswordResponse(passwordBundle.getRaw());
     }
 
 
