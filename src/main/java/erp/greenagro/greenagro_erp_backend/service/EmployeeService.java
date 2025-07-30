@@ -3,6 +3,7 @@ package erp.greenagro.greenagro_erp_backend.service;
 import erp.greenagro.greenagro_erp_backend.dto.branch.BranchSummaryResponse;
 import erp.greenagro.greenagro_erp_backend.dto.employee.*;
 import erp.greenagro.greenagro_erp_backend.dto.payinfo.PayInfoDTO;
+import erp.greenagro.greenagro_erp_backend.helper.PasswordHelper;
 import erp.greenagro.greenagro_erp_backend.mapper.BranchMapper;
 import erp.greenagro.greenagro_erp_backend.mapper.EmployeeMapper;
 import erp.greenagro.greenagro_erp_backend.mapper.PayInfoMapper;
@@ -13,7 +14,7 @@ import erp.greenagro.greenagro_erp_backend.model.enums.AccountStatus;
 import erp.greenagro.greenagro_erp_backend.model.enums.Role;
 import erp.greenagro.greenagro_erp_backend.repository.BranchRepository;
 import erp.greenagro.greenagro_erp_backend.repository.EmployeeRepository;
-import erp.greenagro.greenagro_erp_backend.util.SecurityUtil;
+import erp.greenagro.greenagro_erp_backend.util.RrnCryptoUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -30,6 +31,7 @@ public class EmployeeService {
     private final EmployeeMapper employeeMapper;
     private final BranchMapper branchMapper;
     private final PayInfoMapper payInfoMapper;
+    private final PasswordHelper passwordHelper;
 
 
     //직원 등록
@@ -42,10 +44,10 @@ public class EmployeeService {
         PayInfo payInfo = payInfoMapper.toEntity(request.getPayInfo());
 
         //임시 비밀번호 생성
-        SecurityUtil.PasswordBundle passwordBundle = SecurityUtil.generateTempPassword();
+        PasswordHelper.PasswordBundle passwordBundle = passwordHelper.generateTempPassword();
 
         //주민번호 암호화
-        String encryptedRrn = SecurityUtil.encryptRrn(request.getRrn());
+        String encryptedRrn = RrnCryptoUtil.encryptRrn(request.getRrn());
 
         //employee 객체 생성
         Employee employee = employeeMapper.fromCreate(request, branch, payInfo, passwordBundle.getHashed(), encryptedRrn);
@@ -65,7 +67,7 @@ public class EmployeeService {
         Employee employee = getEmployeeOrThrow(id);
 
         //주민등록번호 복호화
-        String decryptRrn = SecurityUtil.decryptRrn(employee.getRrn());
+        String decryptRrn = RrnCryptoUtil.decryptRrn(employee.getRrn());
 
         //지점정보 DTO
         BranchSummaryResponse branchSummaryResponse = branchMapper.toResponse(employee.getBranch());
@@ -142,7 +144,7 @@ public class EmployeeService {
         PayInfo payInfo = employee.getPayInfo();
 
         //주민번호 암호화
-        String encryptedRrn = SecurityUtil.encryptRrn(request.getRrn());
+        String encryptedRrn = RrnCryptoUtil.encryptRrn(request.getRrn());
 
         //직원 업데이트
         employee.update(branch, request.getName(), encryptedRrn, request.getPosition(), request.getPhone(), request.getEmail(), request.getAddress(), request.getHireDate(), request.getResignDate(), request.getRole(), request.getStatus());
@@ -170,7 +172,7 @@ public class EmployeeService {
         Employee employee = getEmployeeOrThrow(id);
 
         //임시 비밀번호 생성
-        SecurityUtil.PasswordBundle passwordBundle = SecurityUtil.generateTempPassword();
+        PasswordHelper.PasswordBundle passwordBundle = passwordHelper.generateTempPassword();
 
         //직원 비밀번호 초기화
         employee.resetPassword(passwordBundle.getHashed());
