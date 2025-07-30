@@ -29,6 +29,11 @@ public class PasswordHelper {
     }
 
 
+    public String encode(String raw){
+        return passwordEncoder.encode(raw);
+    }
+
+
     public boolean matches(String raw, String hashed) {
         return passwordEncoder.matches(raw, hashed);
     }
