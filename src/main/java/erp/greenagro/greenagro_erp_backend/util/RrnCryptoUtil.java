@@ -1,31 +1,10 @@
 package erp.greenagro.greenagro_erp_backend.util;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-
 import javax.crypto.Cipher;
 import javax.crypto.spec.SecretKeySpec;
 import java.util.Base64;
-import java.util.UUID;
 
-public class SecurityUtil {
-
-    private static final BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
-
-    /**
-     * 8자리 랜덤 임시비밀번호 생성
-     * @return (평문, 해시화) 비밀번호 번들
-     */
-    public static PasswordBundle generateTempPassword(){
-        //임시 비밀번호 8자리 생성
-        String rawPwd = UUID.randomUUID().toString().substring(0, 8);
-        //해시화
-        String hashedPwd = encoder.encode(rawPwd);
-
-        return new PasswordBundle(rawPwd, hashedPwd);
-    }
-
+public class RrnCryptoUtil {
 
     /**
      * 주민등록번호 암호화
@@ -64,13 +43,4 @@ public class SecurityUtil {
         }
     }
 
-
-    //비밀번호 원문 + 해시 번들
-    @Getter
-    @AllArgsConstructor
-    public static class PasswordBundle{
-        private final String raw;
-        private final String hashed;
-
-    }
 }
