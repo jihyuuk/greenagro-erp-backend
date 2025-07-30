@@ -3,6 +3,7 @@ package erp.greenagro.greenagro_erp_backend.controller;
 import erp.greenagro.greenagro_erp_backend.dto.employee.*;
 import erp.greenagro.greenagro_erp_backend.model.enums.AccountStatus;
 import erp.greenagro.greenagro_erp_backend.service.EmployeeService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -20,7 +21,7 @@ public class EmployeeController {
 
     //직원 등록
     @PostMapping("/employees")
-    public ResponseEntity<CreateEmployeeResponse> createEmployee(@RequestBody CreateEmployeeRequest request){
+    public ResponseEntity<CreateEmployeeResponse> createEmployee(@RequestBody @Valid CreateEmployeeRequest request){
         CreateEmployeeResponse response = employeeService.createEmployee(request);
         return ResponseEntity.status(CREATED).body(response);
     }
@@ -50,7 +51,7 @@ public class EmployeeController {
 
     //직원 업데이트
     @PutMapping("/employees/{id}")
-    public ResponseEntity<Void> updateEmployee(@PathVariable Long id, @RequestBody UpdateEmployeeRequest request){
+    public ResponseEntity<Void> updateEmployee(@PathVariable Long id, @RequestBody @Valid UpdateEmployeeRequest request){
         employeeService.updateEmployee(id, request);
         return ResponseEntity.noContent().build();
     }
@@ -58,7 +59,7 @@ public class EmployeeController {
 
     //직원 퇴사 처리
     @PatchMapping("/employees/{id}/resign")
-    public ResponseEntity<Void> resignEmployee(@PathVariable Long id, @RequestBody ResignEmployeeRequest request){
+    public ResponseEntity<Void> resignEmployee(@PathVariable Long id, @RequestBody @Valid ResignEmployeeRequest request){
         employeeService.resignEmployee(id, request);
         return ResponseEntity.noContent().build();
     }
