@@ -43,4 +43,14 @@ public class RrnCryptoUtil {
         }
     }
 
+    /**
+     * 주문등록번호 평문과 암호문이 일치하는지 확인
+     * @param rawRrn 평문 주민등록번호
+     * @param encryptedRrn 암호화된 주민등록 번호
+     * @return
+     */
+    public static boolean matches(String rawRrn, String encryptedRrn){
+        return decryptRrn(encryptedRrn).equals(rawRrn);
+    }
+
 }
