@@ -23,4 +23,17 @@ class RrnCryptoUtilTest {
         assertEquals(rawRrn, decryptRrn);//복호화 되었는지 판별
     }
 
+    //매칭 메소드 테스트
+    @Test
+    void 주민등록번호_매칭() {
+        //given
+        String rawRrn = "123456-1234567"; //평문 주민번호
+
+        //when
+        String encryptRrn = encryptRrn(rawRrn); //주민번호 암호화
+
+        //then
+        assertTrue(matches(rawRrn, encryptRrn)); //매칭확인
+    }
+
 }
