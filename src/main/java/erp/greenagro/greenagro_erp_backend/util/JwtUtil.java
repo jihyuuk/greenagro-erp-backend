@@ -2,15 +2,15 @@ package erp.greenagro.greenagro_erp_backend.util;
 
 
 import erp.greenagro.greenagro_erp_backend.model.enums.Role;
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import javax.crypto.SecretKey;
 import java.util.Date;
 
+@Slf4j
 @Component
 public class JwtUtil {
 
@@ -37,12 +37,17 @@ public class JwtUtil {
      * JWT 토큰 검증
      */
     public boolean validateToken(String token){
+        
         try {
             getClaims(token); //여기서 유효성검사 자동 실행된다.
             return true;
-        }catch (Exception e){
-            return false;
+        } catch (ExpiredJwtException e) {
+            log.warn("JWT 만료됨");
+        } catch (JwtException e) {
+            log.warn("JWT 유효하지 않음");
         }
+
+        return false;
     }
 
 
