@@ -4,6 +4,7 @@ import erp.greenagro.greenagro_erp_backend.dto.login.LoginRequest;
 import erp.greenagro.greenagro_erp_backend.dto.login.LoginResponse;
 import erp.greenagro.greenagro_erp_backend.helper.PasswordHelper;
 import erp.greenagro.greenagro_erp_backend.model.entity.Employee;
+import erp.greenagro.greenagro_erp_backend.model.enums.AccountStatus;
 import erp.greenagro.greenagro_erp_backend.repository.EmployeeRepository;
 import erp.greenagro.greenagro_erp_backend.util.JwtUtil;
 import lombok.RequiredArgsConstructor;
@@ -20,6 +21,11 @@ public class LoginService {
     public LoginResponse login(LoginRequest request){
         //username 으로 직원 조회
         Employee employee = employeeRepository.findByName(request.getUsername()).orElseThrow(() -> new IllegalArgumentException("존재하지 않는 직원입니다. 이름: " + request.getUsername()));
+
+        //계정 상태 확인 (ACTIVE 만 가능)
+        if(employee.getStatus() != AccountStatus.ACTIVE){
+            throw new IllegalArgumentException("계정상태 로그인 불가");
+        }
 
         //비밀번호 매칭 확인
         if(isNotMatchesPassword(request.getPassword(), employee.getPassword())){
