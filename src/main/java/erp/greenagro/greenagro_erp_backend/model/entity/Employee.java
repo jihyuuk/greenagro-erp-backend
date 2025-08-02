@@ -21,6 +21,7 @@ public class Employee {
     @JoinColumn(name = "branch_id")
     private Branch branch; //지점번호
 
+    @Column(unique = true, nullable = false)
     private String name; //이름
 
     private String password; //비밀번호 (BCrypt 암호화)
