@@ -8,6 +8,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import javax.crypto.SecretKey;
+import java.time.Duration;
 import java.util.Date;
 
 @Slf4j
@@ -15,19 +16,34 @@ import java.util.Date;
 public class JwtUtil {
 
     private static final SecretKey SECRET_KEY = Keys.secretKeyFor(SignatureAlgorithm.HS256);
-    private static final long EXPIRATION = 1000 * 60 * 30; //유효기간 - 30분
+    private static final long ACCESS_TOKEN_EXP = 1000 * 60 * 30; //유효기간 - 30분
+    private static final long REFRESH_TOKEN_EXP = 1000 * 60 * 60 * 24 * 7; // 7일 따로 고려
 
     /**
-     * JWT 토큰 생성
+     * access-token 생성
      */
-    public String generateToken(Long userId, String userName, Role role){
+    public String generateAccessToken(Long userId, String userName, Role role){
         return Jwts.builder()
                 .setSubject("access-token")
                 .claim("userId", userId)
                 .claim("userName", userName)
                 .claim("role", role.name())
                 .setIssuedAt(new Date())
-                .setExpiration(new Date(System.currentTimeMillis() + EXPIRATION))
+                .setExpiration(new Date(System.currentTimeMillis() + ACCESS_TOKEN_EXP))
+                .signWith(SECRET_KEY, SignatureAlgorithm.HS256)
+                .compact();
+    }
+
+
+    /**
+     * refresh-token 생성
+     */
+    public String generateRefreshToken(Long userId){
+        return Jwts.builder()
+                .setSubject("refresh-token")
+                .claim("userId", userId)
+                .setIssuedAt(new Date())
+                .setExpiration(new Date(System.currentTimeMillis() + REFRESH_TOKEN_EXP))
                 .signWith(SECRET_KEY, SignatureAlgorithm.HS256)
                 .compact();
     }

@@ -1,7 +1,7 @@
 package erp.greenagro.greenagro_erp_backend.service;
 
 import erp.greenagro.greenagro_erp_backend.dto.login.LoginRequest;
-import erp.greenagro.greenagro_erp_backend.dto.login.LoginResponse;
+import erp.greenagro.greenagro_erp_backend.dto.login.TokenBundle;
 import erp.greenagro.greenagro_erp_backend.helper.PasswordHelper;
 import erp.greenagro.greenagro_erp_backend.model.entity.Employee;
 import erp.greenagro.greenagro_erp_backend.model.enums.AccountStatus;
@@ -14,15 +14,16 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class LoginService {
 
+    private final RefreshTokenRedisService refreshTokenRedisService;
     private final EmployeeRepository employeeRepository;
     private final PasswordHelper passwordHelper;
     private final JwtUtil jwtUtil;
 
-    public LoginResponse login(LoginRequest request){
+    public TokenBundle login(LoginRequest request){
         //username 으로 직원 조회
         Employee employee = employeeRepository.findByName(request.getUsername()).orElseThrow(() -> new IllegalArgumentException("존재하지 않는 직원입니다. 이름: " + request.getUsername()));
 
-        //계정 상태 확인 (ACTIVE 만 가능)
+        //계정 상태 확인 (ACTIVE 만 로그인 가능)
         if(employee.getStatus() != AccountStatus.ACTIVE){
             throw new IllegalArgumentException("계정상태 로그인 불가");
         }
@@ -33,10 +34,14 @@ public class LoginService {
         }
 
         //토큰생성
-        String jwtToken = jwtUtil.generateToken(employee.getId(), employee.getName(), employee.getRole());
+        String accessToken = jwtUtil.generateAccessToken(employee.getId(), employee.getName(), employee.getRole());
+        String refreshToken = jwtUtil.generateRefreshToken(employee.getId());
+
+        //refreshToken redis에 저장
+        refreshTokenRedisService.save(employee.getId(), refreshToken);
 
         //반환
-        return new LoginResponse(jwtToken);
+        return new TokenBundle(accessToken, refreshToken);
     }
 
 
