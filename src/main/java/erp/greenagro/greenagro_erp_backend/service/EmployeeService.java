@@ -37,6 +37,11 @@ public class EmployeeService {
     //직원 등록
     @Transactional
     public CreateEmployeeResponse createEmployee(CreateEmployeeRequest request) {
+        //이름 중복여부 체크
+        if (employeeRepository.existsByName(request.getName())) {
+            throw new IllegalArgumentException("이미 존재하는 이름입니다.");
+        }
+
         //지점 조회하기
         Branch branch = getBranchOrThrow(request.getBranchId());
 
