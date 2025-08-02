@@ -35,6 +35,7 @@ public class LoginService {
 
 
     private boolean isNotMatchesPassword(String raw, String encrypted){
-        return passwordHelper.matches(raw, encrypted);
+        return !passwordHelper.matches(raw, encrypted);
     }
+
 }
