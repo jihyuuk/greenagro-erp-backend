@@ -5,6 +5,7 @@ import erp.greenagro.greenagro_erp_backend.dto.auth.TokenBundle;
 import erp.greenagro.greenagro_erp_backend.helper.PasswordHelper;
 import erp.greenagro.greenagro_erp_backend.model.entity.Employee;
 import erp.greenagro.greenagro_erp_backend.model.enums.AccountStatus;
+import erp.greenagro.greenagro_erp_backend.model.enums.Role;
 import erp.greenagro.greenagro_erp_backend.repository.EmployeeRepository;
 import erp.greenagro.greenagro_erp_backend.util.JwtUtil;
 import lombok.RequiredArgsConstructor;
@@ -43,6 +44,39 @@ public class LoginService {
         //반환
         return new TokenBundle(accessToken, refreshToken);
     }
+
+
+    //accessToken 갱신 (RTR 적용)
+    public TokenBundle refresh(String refreshToken){
+
+        //1. 토큰 유효성 검사
+        if (!jwtUtil.validateToken(refreshToken)) {
+            throw new IllegalArgumentException("유효하지 않은 토큰입니다.");
+        }
+
+        //2. claims 추출
+        Long employeeId = jwtUtil.getUserId(refreshToken);
+        String userName = jwtUtil.getUserName(refreshToken);
+        Role role = jwtUtil.getRole(refreshToken);
+
+        //2. 불일치 및 재사용 했을때
+        if(refreshTokenRedisService.isReused(employeeId, refreshToken)){
+            //redis 에서 지우기
+            refreshTokenRedisService.delete(employeeId);
+            //예외 던지기
+            throw new IllegalArgumentException("이미 사용된 refresh token 입니다.");
+        }
+
+        //3. 재발급
+        String newAccessToken = jwtUtil.generateAccessToken(employeeId, userName, role);
+        String newRefreshToken = jwtUtil.generateRefreshToken(employeeId);
+
+        //기존 refreshToken 지우고 새로 등록 (RTR)
+        refreshTokenRedisService.save(employeeId, newRefreshToken);
+
+        return new TokenBundle(newAccessToken, newRefreshToken);
+    }
+
 
 
     private boolean isNotMatchesPassword(String raw, String encrypted){
