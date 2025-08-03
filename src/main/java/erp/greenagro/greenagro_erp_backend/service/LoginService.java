@@ -54,12 +54,10 @@ public class LoginService {
             throw new IllegalArgumentException("유효하지 않은 토큰입니다.");
         }
 
-        //2. claims 추출
+        //2. id 추출
         Long employeeId = jwtUtil.getUserId(refreshToken);
-        String userName = jwtUtil.getUserName(refreshToken);
-        Role role = jwtUtil.getRole(refreshToken);
 
-        //2. 불일치 및 재사용 했을때
+        //3. refreshToken 유효성 검사 (불일치 및 재사용 했을때)
         if(refreshTokenRedisService.isReused(employeeId, refreshToken)){
             //redis 에서 지우기
             refreshTokenRedisService.delete(employeeId);
@@ -67,11 +65,19 @@ public class LoginService {
             throw new IllegalArgumentException("이미 사용된 refresh token 입니다.");
         }
 
-        //3. 재발급
-        String newAccessToken = jwtUtil.generateAccessToken(employeeId, userName, role);
+        //4. 직원 DB 조회
+        Employee employee = employeeRepository.findById(employeeId).orElseThrow(() -> new IllegalArgumentException("존재하지 않는 직원입니다. id=" + employeeId));
+
+        //4-1.계정 상태 확인 (ACTIVE 만 로그인 가능)
+        if(employee.getStatus() != AccountStatus.ACTIVE){
+            throw new IllegalArgumentException("계정상태 로그인 불가");
+        }
+
+        //5. 토큰 재발급
+        String newAccessToken = jwtUtil.generateAccessToken(employeeId, employee.getName(), employee.getRole());
         String newRefreshToken = jwtUtil.generateRefreshToken(employeeId);
 
-        //기존 refreshToken 지우고 새로 등록 (RTR)
+        //6. 기존 refreshToken 지우고 새로 등록 (RTR)
         refreshTokenRedisService.save(employeeId, newRefreshToken);
 
         return new TokenBundle(newAccessToken, newRefreshToken);
