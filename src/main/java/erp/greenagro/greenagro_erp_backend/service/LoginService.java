@@ -1,7 +1,7 @@
 package erp.greenagro.greenagro_erp_backend.service;
 
-import erp.greenagro.greenagro_erp_backend.dto.login.LoginRequest;
-import erp.greenagro.greenagro_erp_backend.dto.login.TokenBundle;
+import erp.greenagro.greenagro_erp_backend.dto.auth.LoginRequest;
+import erp.greenagro.greenagro_erp_backend.dto.auth.TokenBundle;
 import erp.greenagro.greenagro_erp_backend.helper.PasswordHelper;
 import erp.greenagro.greenagro_erp_backend.model.entity.Employee;
 import erp.greenagro.greenagro_erp_backend.model.enums.AccountStatus;

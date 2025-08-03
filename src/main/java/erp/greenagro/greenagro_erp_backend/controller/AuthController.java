@@ -1,8 +1,8 @@
 package erp.greenagro.greenagro_erp_backend.controller;
 
-import erp.greenagro.greenagro_erp_backend.dto.login.LoginRequest;
-import erp.greenagro.greenagro_erp_backend.dto.login.LoginResponse;
-import erp.greenagro.greenagro_erp_backend.dto.login.TokenBundle;
+import erp.greenagro.greenagro_erp_backend.dto.auth.LoginRequest;
+import erp.greenagro.greenagro_erp_backend.dto.auth.LoginResponse;
+import erp.greenagro.greenagro_erp_backend.dto.auth.TokenBundle;
 import erp.greenagro.greenagro_erp_backend.service.LoginService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
@@ -14,12 +14,12 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequiredArgsConstructor
-public class LoginController {
+public class AuthController {
 
     private final LoginService loginService;
     private static final long REFRESH_TOKEN_EXP = 1000 * 60 * 60 * 24 * 7; // 7일 따로 고려
 
-    @PostMapping("/login")
+    @PostMapping("/auth/login")
     public ResponseEntity<LoginResponse> login(@RequestBody LoginRequest request){
         //access, refresh 토큰 생성
         TokenBundle tokenBundle = loginService.login(request);
