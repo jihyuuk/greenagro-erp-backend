@@ -26,7 +26,7 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable()) // CSRF 비활성화
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)) //세션 사용 안함
                 .authorizeHttpRequests(auth -> auth //엔드 포인드 설정
-                        .requestMatchers("/auth/login").permitAll()
+                        .requestMatchers("/auth/login", "/auth/refresh").permitAll()
                         .anyRequest().authenticated()
                 ).build();
     }
