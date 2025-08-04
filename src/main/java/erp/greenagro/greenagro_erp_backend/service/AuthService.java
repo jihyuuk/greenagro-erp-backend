@@ -9,11 +9,10 @@ import erp.greenagro.greenagro_erp_backend.repository.EmployeeRepository;
 import erp.greenagro.greenagro_erp_backend.util.JwtUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.PostMapping;
 
 @Service
 @RequiredArgsConstructor
-public class LoginService {
+public class AuthService {
 
     private final RefreshTokenRedisService refreshTokenRedisService;
     private final EmployeeRepository employeeRepository;

@@ -3,7 +3,7 @@ package erp.greenagro.greenagro_erp_backend.controller;
 import erp.greenagro.greenagro_erp_backend.dto.auth.LoginRequest;
 import erp.greenagro.greenagro_erp_backend.dto.auth.AccessTokenResponse;
 import erp.greenagro.greenagro_erp_backend.dto.auth.TokenBundle;
-import erp.greenagro.greenagro_erp_backend.service.LoginService;
+import erp.greenagro.greenagro_erp_backend.service.AuthService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 public class AuthController {
 
-    private final LoginService loginService;
+    private final AuthService authService;
     private static final long REFRESH_TOKEN_EXP = 1000 * 60 * 60 * 24 * 7; // 7일 따로 고려
 
 
@@ -26,7 +26,7 @@ public class AuthController {
     @PostMapping("/auth/login")
     public ResponseEntity<AccessTokenResponse> login(@RequestBody LoginRequest request){
         //access, refresh 토큰 생성
-        TokenBundle tokenBundle = loginService.login(request);
+        TokenBundle tokenBundle = authService.login(request);
 
         //응답 DTO 생성
         AccessTokenResponse response = new AccessTokenResponse(tokenBundle.getAccessToken());
@@ -44,7 +44,7 @@ public class AuthController {
         //만약 쿠키 값이 누락되었을 경우 MissingServletRequestCookieException 예외처리 필요함
 
         //access, refresh 토큰 생성
-        TokenBundle tokenBundle = loginService.refresh(refreshToken);
+        TokenBundle tokenBundle = authService.refresh(refreshToken);
 
         //응답 DTO 생성
         AccessTokenResponse response = new AccessTokenResponse(tokenBundle.getAccessToken());
@@ -59,7 +59,7 @@ public class AuthController {
     @PostMapping("/auth/logout")
     public ResponseEntity<Void> logout(@AuthenticationPrincipal Long userId){
         //스프링 시큐리티에서 principal 가져오기 (나중에 userDetail 사용시 수정 필요)
-        loginService.logout(userId);
+        authService.logout(userId);
 
         return ResponseEntity.noContent()
                 //https 사용시 .header(HttpHeaders.SET_COOKIE, "\"refreshToken=; HttpOnly; Path=/; Max-Age=0; Secure; SameSite=None")
