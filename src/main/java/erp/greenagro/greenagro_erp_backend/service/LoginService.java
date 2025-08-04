@@ -5,11 +5,11 @@ import erp.greenagro.greenagro_erp_backend.dto.auth.TokenBundle;
 import erp.greenagro.greenagro_erp_backend.helper.PasswordHelper;
 import erp.greenagro.greenagro_erp_backend.model.entity.Employee;
 import erp.greenagro.greenagro_erp_backend.model.enums.AccountStatus;
-import erp.greenagro.greenagro_erp_backend.model.enums.Role;
 import erp.greenagro.greenagro_erp_backend.repository.EmployeeRepository;
 import erp.greenagro.greenagro_erp_backend.util.JwtUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.PostMapping;
 
 @Service
 @RequiredArgsConstructor
@@ -20,6 +20,8 @@ public class LoginService {
     private final PasswordHelper passwordHelper;
     private final JwtUtil jwtUtil;
 
+
+    //아이디 비번으로 로그인
     public TokenBundle login(LoginRequest request){
         //username 으로 직원 조회
         Employee employee = employeeRepository.findByName(request.getUsername()).orElseThrow(() -> new IllegalArgumentException("존재하지 않는 직원입니다. 이름: " + request.getUsername()));
@@ -81,6 +83,15 @@ public class LoginService {
         refreshTokenRedisService.save(employeeId, newRefreshToken);
 
         return new TokenBundle(newAccessToken, newRefreshToken);
+    }
+
+
+    //로그아웃
+    public void logout(Long employeeId){
+        //redis 에서 refreshToken 삭제
+        refreshTokenRedisService.delete(employeeId);
+
+        //accessToken 블랙리스트 고려
     }
 
 

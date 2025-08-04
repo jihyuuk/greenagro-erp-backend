@@ -7,6 +7,7 @@ import erp.greenagro.greenagro_erp_backend.service.LoginService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -52,6 +53,20 @@ public class AuthController {
                 .header(HttpHeaders.SET_COOKIE, buildRefreshTokenCookie(tokenBundle.getRefreshToken()))
                 .body(response);
     }
+
+
+    //로그아웃
+    @PostMapping("/auth/logout")
+    public ResponseEntity<Void> logout(@AuthenticationPrincipal Long userId){
+        //스프링 시큐리티에서 principal 가져오기 (나중에 userDetail 사용시 수정 필요)
+        loginService.logout(userId);
+
+        return ResponseEntity.noContent()
+                //https 사용시 .header(HttpHeaders.SET_COOKIE, "\"refreshToken=; HttpOnly; Path=/; Max-Age=0; Secure; SameSite=None")
+                .header(HttpHeaders.SET_COOKIE, "refreshToken=; Max-Age=0; Path=/; HttpOnly")
+                .build();
+    }
+
 
 
     private String buildRefreshTokenCookie(String refreshToken){
