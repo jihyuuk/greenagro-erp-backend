@@ -35,6 +35,7 @@ class EmployeeServiceTest {
     @Autowired EmployeeRepository employeeRepository;
     @Autowired BranchRepository branchRepository;
     @Autowired PasswordEncoder passwordEncoder;
+    @Autowired RrnCryptoUtil rrnCryptoUtil;
 
 
     /*
@@ -76,9 +77,9 @@ class EmployeeServiceTest {
         assertTrue(passwordEncoder.matches(response.getTempPassword(), findEmployee.getPassword()));//비밀번호 매칭 확인
 
         assertNotEquals(findEmployee.getRrn(), request.getRrn());
-        assertEquals(RrnCryptoUtil.encryptRrn((request.getRrn())), findEmployee.getRrn()); //주민번호 암호화 확인
-        assertEquals(RrnCryptoUtil.decryptRrn(findEmployee.getRrn()), request.getRrn()); //주민번호 복호화 확인
-        assertTrue(RrnCryptoUtil.matches(request.getRrn(), findEmployee.getRrn())); //주민등록번호 매칭확인
+        assertEquals(rrnCryptoUtil.encryptRrn((request.getRrn())), findEmployee.getRrn()); //주민번호 암호화 확인
+        assertEquals(rrnCryptoUtil.decryptRrn(findEmployee.getRrn()), request.getRrn()); //주민번호 복호화 확인
+        assertTrue(rrnCryptoUtil.matches(request.getRrn(), findEmployee.getRrn())); //주민등록번호 매칭확인
     }
 
 
@@ -96,7 +97,7 @@ class EmployeeServiceTest {
         //employee 확인
         assertEquals(employee.getId(), response.getId());
         assertEquals(employee.getName(), response.getName());
-        assertTrue(RrnCryptoUtil.matches(response.getRrn(), employee.getRrn())); //주민번호 복호화 확인
+        assertTrue(rrnCryptoUtil.matches(response.getRrn(), employee.getRrn())); //주민번호 복호화 확인
         assertEquals(employee.getPhone(), response.getPhone());
         assertEquals(employee.getEmail(), response.getEmail());
         assertEquals(employee.getAddress(), response.getAddress());
@@ -185,7 +186,7 @@ class EmployeeServiceTest {
         //직원 업데이트 확인
         assertEquals(request.getBranchId(), afterEmployee.getBranch().getId());
         assertEquals(request.getName(), afterEmployee.getName());
-        assertTrue(RrnCryptoUtil.matches(request.getRrn(), afterEmployee.getRrn()));
+        assertTrue(rrnCryptoUtil.matches(request.getRrn(), afterEmployee.getRrn()));
         assertEquals(request.getPosition(), afterEmployee.getPosition());
         assertEquals(request.getPhone(), afterEmployee.getPhone());
         assertEquals(request.getEmail(), afterEmployee.getEmail());
@@ -258,9 +259,9 @@ class EmployeeServiceTest {
         PayInfo payInfo3 = new PayInfo("하나은행", "356-789-123456", "이영희", 2_850_000L);
 
         //직원생성
-        Employee employee1 = new Employee(incheon, "홍길동", passwordEncoder.encode("encodedPassword1"), RrnCryptoUtil.encryptRrn("encryptedRrn1"), "과장", "010-1111-2222", "hong@example.com", "서울시 강남구", LocalDate.of(2020, 1, 15), Role.ADMIN, AccountStatus.ACTIVE, payInfo1);
-        Employee employee2 = new Employee(kimpo, "김철수", passwordEncoder.encode("encodedPassword2"), RrnCryptoUtil.encryptRrn("encryptedRrn2"), "대리", "010-2222-3333", "kim@example.com", "부산시 해운대구", LocalDate.of(2021, 6, 3), Role.MANAGER, AccountStatus.ON_LEAVE, payInfo2);
-        Employee employee3 = new Employee(incheon, "이영희", passwordEncoder.encode("encodedPassword3"), RrnCryptoUtil.encryptRrn("encryptedRrn3"), "사원", "010-4444-5555", "lee@example.com", "대전시 유성구", LocalDate.of(2022, 11, 20), Role.STAFF, AccountStatus.RESIGNED, payInfo3);
+        Employee employee1 = new Employee(incheon, "홍길동", passwordEncoder.encode("encodedPassword1"), rrnCryptoUtil.encryptRrn("encryptedRrn1"), "과장", "010-1111-2222", "hong@example.com", "서울시 강남구", LocalDate.of(2020, 1, 15), Role.ADMIN, AccountStatus.ACTIVE, payInfo1);
+        Employee employee2 = new Employee(kimpo, "김철수", passwordEncoder.encode("encodedPassword2"), rrnCryptoUtil.encryptRrn("encryptedRrn2"), "대리", "010-2222-3333", "kim@example.com", "부산시 해운대구", LocalDate.of(2021, 6, 3), Role.MANAGER, AccountStatus.ON_LEAVE, payInfo2);
+        Employee employee3 = new Employee(incheon, "이영희", passwordEncoder.encode("encodedPassword3"), rrnCryptoUtil.encryptRrn("encryptedRrn3"), "사원", "010-4444-5555", "lee@example.com", "대전시 유성구", LocalDate.of(2022, 11, 20), Role.STAFF, AccountStatus.RESIGNED, payInfo3);
 
         employeeRepository.save(employee1);
         employeeRepository.save(employee2);

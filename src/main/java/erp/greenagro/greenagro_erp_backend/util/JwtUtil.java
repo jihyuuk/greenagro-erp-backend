@@ -5,6 +5,7 @@ import erp.greenagro.greenagro_erp_backend.model.enums.Role;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import javax.crypto.SecretKey;
@@ -15,9 +16,19 @@ import java.util.Date;
 @Component
 public class JwtUtil {
 
-    private static final SecretKey SECRET_KEY = Keys.secretKeyFor(SignatureAlgorithm.HS256);
-    private static final long ACCESS_TOKEN_EXP = 1000 * 60 * 30; //유효기간 - 30분
-    private static final long REFRESH_TOKEN_EXP = 1000 * 60 * 60 * 24 * 7; // 7일 따로 고려
+    private final SecretKey SECRET_KEY;
+    private final Duration ACCESS_TOKEN_EXP; //유효기간 - 30분
+    private final Duration REFRESH_TOKEN_EXP; //유효기간 - 7일
+
+    public JwtUtil(
+            @Value("${spring.jwt.secret}") String secret,
+            @Value("${spring.jwt.access-exp}") Duration accessTokenExp,
+            @Value("${spring.jwt.refresh-exp}") Duration refreshTokenExp
+    ){
+        this.SECRET_KEY = Keys.hmacShaKeyFor(secret.getBytes());
+        this.ACCESS_TOKEN_EXP = accessTokenExp;
+        this.REFRESH_TOKEN_EXP = refreshTokenExp;
+    }
 
     /**
      * access-token 생성
@@ -29,7 +40,7 @@ public class JwtUtil {
                 .claim("userName", userName)
                 .claim("role", role.name())
                 .setIssuedAt(new Date())
-                .setExpiration(new Date(System.currentTimeMillis() + ACCESS_TOKEN_EXP))
+                .setExpiration(new Date(System.currentTimeMillis() + ACCESS_TOKEN_EXP.toMillis()))
                 .signWith(SECRET_KEY, SignatureAlgorithm.HS256)
                 .compact();
     }
@@ -43,7 +54,7 @@ public class JwtUtil {
                 .setSubject("refresh-token")
                 .claim("userId", userId)
                 .setIssuedAt(new Date())
-                .setExpiration(new Date(System.currentTimeMillis() + REFRESH_TOKEN_EXP))
+                .setExpiration(new Date(System.currentTimeMillis() + REFRESH_TOKEN_EXP.toMillis()))
                 .signWith(SECRET_KEY, SignatureAlgorithm.HS256)
                 .compact();
     }

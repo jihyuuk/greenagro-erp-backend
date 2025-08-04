@@ -1,22 +1,31 @@
 package erp.greenagro.greenagro_erp_backend.util;
 
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
+
 import javax.crypto.Cipher;
+import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 import java.util.Base64;
 
+@Component
 public class RrnCryptoUtil {
+
+    private final SecretKey AES_KEY;
+
+    public RrnCryptoUtil(@Value("${spring.rrn.aes-key}") String aseKey) {
+        this.AES_KEY = new SecretKeySpec(aseKey.getBytes(), "AES");
+    }
 
     /**
      * 주민등록번호 암호화
      * @param rrn 평문 주민등록번호
      * @return AES 암호화된 주민등록번호
      */
-    public static String encryptRrn(String rrn){
+    public String encryptRrn(String rrn){
         try {
-            String AES_KEY_RRN = System.getenv("AES_KEY_RRN");
-            SecretKeySpec key = new SecretKeySpec(AES_KEY_RRN.getBytes(), "AES");
             Cipher cipher = Cipher.getInstance("AES");
-            cipher.init(Cipher.ENCRYPT_MODE, key);
+            cipher.init(Cipher.ENCRYPT_MODE, AES_KEY);
             byte[] encrypted = cipher.doFinal(rrn.getBytes());
             return Base64.getEncoder().encodeToString(encrypted);
         } catch (Exception e) {
@@ -29,12 +38,10 @@ public class RrnCryptoUtil {
      * @param encryptedRrn AES 암호화된 주민등록번호
      * @return 평문 주민등록번호
      */
-    public static String decryptRrn(String encryptedRrn){
+    public String decryptRrn(String encryptedRrn){
         try {
-            String AES_KEY_RRN = System.getenv("AES_KEY_RRN");
-            SecretKeySpec key = new SecretKeySpec(AES_KEY_RRN.getBytes(), "AES");
             Cipher cipher = Cipher.getInstance("AES");
-            cipher.init(Cipher.DECRYPT_MODE, key);
+            cipher.init(Cipher.DECRYPT_MODE, AES_KEY);
             byte[] decoded = Base64.getDecoder().decode(encryptedRrn);
             byte[] decrypted = cipher.doFinal(decoded);
             return new String(decrypted);
@@ -49,7 +56,7 @@ public class RrnCryptoUtil {
      * @param encryptedRrn 암호화된 주민등록 번호
      * @return
      */
-    public static boolean matches(String rawRrn, String encryptedRrn){
+    public boolean matches(String rawRrn, String encryptedRrn){
         return decryptRrn(encryptedRrn).equals(rawRrn);
     }
 
