@@ -82,7 +82,15 @@ public class JwtUtil {
      * JWT 토큰 만료 여부 확인
      */
     public boolean isExpired(String token){
-        return getClaims(token).getExpiration().before(new Date());
+        try {
+            return getClaims(token).getExpiration().before(new Date());
+        } catch (ExpiredJwtException e) {
+            return true;
+        } catch (JwtException e) {
+            //위조된 토큰 → 일단 만료된 걸로 간주
+            log.warn("유효하지 않은 토큰입니다: {}", e.getMessage());
+            return true;
+        }
     }
 
 
@@ -112,7 +120,7 @@ public class JwtUtil {
 
 
     //모든 claims 가져오기
-    private Claims getClaims(String token){
+    public Claims getClaims(String token){
         return Jwts.parserBuilder()
                 .setSigningKey(SECRET_KEY)
                 .build()
