@@ -1,12 +1,18 @@
 package erp.greenagro.greenagro_erp_backend.util;
 
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
 
-import static erp.greenagro.greenagro_erp_backend.util.RrnCryptoUtil.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 
+@SpringBootTest
 class RrnCryptoUtilTest {
+
+    @Autowired
+    RrnCryptoUtil rrnCryptoUtil;
+
 
     //주민등록번호 암호화 복호화 테스트
     @Test
@@ -15,8 +21,8 @@ class RrnCryptoUtilTest {
         String rawRrn = "123456-1234567"; //평문 주민번호
 
         //when
-        String encryptRrn = encryptRrn(rawRrn); //주민번호 암호화
-        String decryptRrn = decryptRrn(encryptRrn); //주민번호 복호화
+        String encryptRrn = rrnCryptoUtil.encryptRrn(rawRrn); //주민번호 암호화
+        String decryptRrn = rrnCryptoUtil.decryptRrn(encryptRrn); //주민번호 복호화
 
         //then
         assertNotEquals(rawRrn, encryptRrn);//암호화 되었는지 판별
@@ -30,10 +36,10 @@ class RrnCryptoUtilTest {
         String rawRrn = "123456-1234567"; //평문 주민번호
 
         //when
-        String encryptRrn = encryptRrn(rawRrn); //주민번호 암호화
+        String encryptRrn = rrnCryptoUtil.encryptRrn(rawRrn); //주민번호 암호화
 
         //then
-        assertTrue(matches(rawRrn, encryptRrn)); //매칭확인
+        assertTrue(rrnCryptoUtil.matches(rawRrn, encryptRrn)); //매칭확인
     }
 
 }

@@ -28,6 +28,7 @@ public class EmployeeService {
 
     private final EmployeeRepository employeeRepository;
     private final BranchRepository branchRepository;
+    private final RrnCryptoUtil rrnCryptoUtil;
     private final EmployeeMapper employeeMapper;
     private final BranchMapper branchMapper;
     private final PayInfoMapper payInfoMapper;
@@ -37,6 +38,11 @@ public class EmployeeService {
     //직원 등록
     @Transactional
     public CreateEmployeeResponse createEmployee(CreateEmployeeRequest request) {
+        //이름 중복여부 체크
+        if (employeeRepository.existsByName(request.getName())) {
+            throw new IllegalArgumentException("이미 존재하는 이름입니다.");
+        }
+
         //지점 조회하기
         Branch branch = getBranchOrThrow(request.getBranchId());
 
@@ -47,7 +53,7 @@ public class EmployeeService {
         PasswordHelper.PasswordBundle passwordBundle = passwordHelper.generateTempPassword();
 
         //주민번호 암호화
-        String encryptedRrn = RrnCryptoUtil.encryptRrn(request.getRrn());
+        String encryptedRrn = rrnCryptoUtil.encryptRrn(request.getRrn());
 
         //employee 객체 생성
         Employee employee = employeeMapper.fromCreate(request, branch, payInfo, passwordBundle.getHashed(), encryptedRrn);
@@ -67,7 +73,7 @@ public class EmployeeService {
         Employee employee = getEmployeeOrThrow(id);
 
         //주민등록번호 복호화
-        String decryptRrn = RrnCryptoUtil.decryptRrn(employee.getRrn());
+        String decryptRrn = rrnCryptoUtil.decryptRrn(employee.getRrn());
 
         //지점정보 DTO
         BranchSummaryResponse branchSummaryResponse = branchMapper.toResponse(employee.getBranch());
@@ -144,7 +150,7 @@ public class EmployeeService {
         PayInfo payInfo = employee.getPayInfo();
 
         //주민번호 암호화
-        String encryptedRrn = RrnCryptoUtil.encryptRrn(request.getRrn());
+        String encryptedRrn = rrnCryptoUtil.encryptRrn(request.getRrn());
 
         //직원 업데이트
         employee.update(branch, request.getName(), encryptedRrn, request.getPosition(), request.getPhone(), request.getEmail(), request.getAddress(), request.getHireDate(), request.getResignDate(), request.getRole(), request.getStatus());
