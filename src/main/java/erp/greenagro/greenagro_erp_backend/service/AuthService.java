@@ -10,6 +10,8 @@ import erp.greenagro.greenagro_erp_backend.util.JwtUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.UUID;
+
 @Service
 @RequiredArgsConstructor
 public class AuthService {
@@ -35,12 +37,15 @@ public class AuthService {
             throw new IllegalArgumentException("비밀번호가 다릅니다.");
         }
 
-        //토큰생성
-        String accessToken = jwtUtil.generateAccessToken(employee.getId(), employee.getName(), employee.getRole());
-        String refreshToken = jwtUtil.generateRefreshToken(employee.getId());
+        //기기 식별자 생성 <- 현재는 서버에서 생성하지만 클라에서 생성하는 것도 고려 필요
+        String deviceId = UUID.randomUUID().toString();
 
-        //refreshToken redis에 저장
-        refreshTokenRedisService.save(employee.getId(), refreshToken);
+        //토큰생성
+        String accessToken = jwtUtil.generateAccessToken(employee.getId(), employee.getName(), employee.getRole(), deviceId);
+        String refreshToken = jwtUtil.generateRefreshToken(employee.getId(), deviceId);
+
+        //refreshToken Redis에 저장
+        refreshTokenRedisService.save(employee.getId(), deviceId, refreshToken);
 
         //반환
         return new TokenBundle(accessToken, refreshToken);
@@ -55,13 +60,14 @@ public class AuthService {
             throw new IllegalArgumentException("유효하지 않은 토큰입니다.");
         }
 
-        //2. id 추출
+        //2. 직원 id, 기기 식별자 추출
         Long employeeId = jwtUtil.getUserId(refreshToken);
+        String deviceId = jwtUtil.getDeviceId(refreshToken);
 
         //3. refreshToken 유효성 검사 (불일치 및 재사용 했을때)
-        if(refreshTokenRedisService.isReused(employeeId, refreshToken)){
+        if(refreshTokenRedisService.isReused(employeeId, deviceId, refreshToken)){
             //redis 에서 지우기
-            refreshTokenRedisService.delete(employeeId);
+            refreshTokenRedisService.delete(employeeId, deviceId);
             //예외 던지기
             throw new IllegalArgumentException("이미 사용된 refresh token 입니다.");
         }
@@ -75,20 +81,29 @@ public class AuthService {
         }
 
         //5. 토큰 재발급
-        String newAccessToken = jwtUtil.generateAccessToken(employeeId, employee.getName(), employee.getRole());
-        String newRefreshToken = jwtUtil.generateRefreshToken(employeeId);
+        String newAccessToken = jwtUtil.generateAccessToken(employeeId, employee.getName(), employee.getRole(), deviceId);
+        String newRefreshToken = jwtUtil.generateRefreshToken(employeeId, deviceId);
 
         //6. 기존 refreshToken 지우고 새로 등록 (RTR)
-        refreshTokenRedisService.save(employeeId, newRefreshToken);
+        refreshTokenRedisService.save(employeeId, deviceId, newRefreshToken);
 
         return new TokenBundle(newAccessToken, newRefreshToken);
     }
 
 
     //로그아웃
-    public void logout(Long employeeId){
-        //redis 에서 refreshToken 삭제
-        refreshTokenRedisService.delete(employeeId);
+    public void logout(String refreshToken){
+        //1. 토큰 유효성 검사
+        if (!jwtUtil.validateToken(refreshToken)) {
+            throw new IllegalArgumentException("유효하지 않은 토큰입니다.");
+        }
+
+        //2. 클레임 추출
+        Long employeeId = jwtUtil.getUserId(refreshToken);
+        String deviceId = jwtUtil.getDeviceId(refreshToken);
+
+        //3. Redis 에서 refreshToken 삭제
+        refreshTokenRedisService.delete(employeeId, deviceId);
 
         //accessToken 블랙리스트 고려
     }

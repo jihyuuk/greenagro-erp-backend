@@ -33,12 +33,13 @@ public class JwtUtil {
     /**
      * access-token 생성
      */
-    public String generateAccessToken(Long userId, String userName, Role role){
+    public String generateAccessToken(Long userId, String userName, Role role, String deviceId){
         return Jwts.builder()
                 .setSubject("access-token")
                 .claim("userId", userId)
                 .claim("userName", userName)
                 .claim("role", role.name())
+                .claim("deviceId", deviceId)
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + ACCESS_TOKEN_EXP.toMillis()))
                 .signWith(SECRET_KEY, SignatureAlgorithm.HS256)
@@ -49,10 +50,11 @@ public class JwtUtil {
     /**
      * refresh-token 생성
      */
-    public String generateRefreshToken(Long userId){
+    public String generateRefreshToken(Long userId, String deviceId){
         return Jwts.builder()
                 .setSubject("refresh-token")
                 .claim("userId", userId)
+                .claim("deviceId", deviceId)
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + REFRESH_TOKEN_EXP.toMillis()))
                 .signWith(SECRET_KEY, SignatureAlgorithm.HS256)
@@ -117,6 +119,23 @@ public class JwtUtil {
         String strRole = getClaims(token).get("role", String.class);
         return Role.valueOf(strRole);
     }
+
+
+    /**
+     * 기기 식별자 가져오기
+     */
+    public String getDeviceId(String token){
+        return getClaims(token).get("deviceId", String.class);
+    }
+
+
+    /**
+     * 만료일 가져오기
+     */
+    public Date getExpDate(String token){
+        return getClaims(token).getExpiration();
+    }
+
 
 
     //모든 claims 가져오기

@@ -13,6 +13,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import javax.crypto.SecretKey;
 import java.time.Duration;
 import java.util.Date;
+import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -35,17 +36,19 @@ class JwtUtilTest {
         Long userId = 1L;
         String userName = "홍길동";
         Role role = Role.ADMIN;
+        String deviceId = UUID.randomUUID().toString();
 
         //when
-        String accessToken = jwtUtil.generateAccessToken(userId, userName, role);
+        String accessToken = jwtUtil.generateAccessToken(userId, userName, role, deviceId);
 
         //then
         assertNotNull(accessToken); //토큰 존재 여부
         assertTrue(jwtUtil.validateToken(accessToken)); //유효성 검증
-        assertEquals(jwtUtil.getClaims(accessToken).getSubject(), "access-token"); //subject 검증
-        assertEquals(jwtUtil.getUserId(accessToken), userId); //claims 값 검증
-        assertEquals(jwtUtil.getUserName(accessToken), userName);
-        assertEquals(jwtUtil.getRole(accessToken), role);
+        assertEquals("access-token", jwtUtil.getClaims(accessToken).getSubject()); //subject 검증
+        assertEquals(userId, jwtUtil.getUserId(accessToken)); //claims 값 검증
+        assertEquals(userName, jwtUtil.getUserName(accessToken));
+        assertEquals(role, jwtUtil.getRole(accessToken));
+        assertEquals(deviceId, jwtUtil.getDeviceId(accessToken));
     }
 
 
@@ -53,16 +56,18 @@ class JwtUtilTest {
     void 리프레시_토큰_생성() {
         //given
         Long userId = 3L;
+        String deviceId = UUID.randomUUID().toString();
 
         //when
-        String refreshToken = jwtUtil.generateRefreshToken(userId);
+        String refreshToken = jwtUtil.generateRefreshToken(userId, deviceId);
 
         //then
         assertNotNull(refreshToken); //토큰 존재 여부
         assertTrue(jwtUtil.validateToken(refreshToken)); //유효성 검증
         assertFalse(jwtUtil.isExpired(refreshToken)); //만료 여부
-        assertEquals(jwtUtil.getClaims(refreshToken).getSubject(), "refresh-token"); //subject 검증
-        assertEquals(jwtUtil.getUserId(refreshToken), userId); //claims 값 검증
+        assertEquals("refresh-token", jwtUtil.getClaims(refreshToken).getSubject()); //subject 검증
+        assertEquals(userId, jwtUtil.getUserId(refreshToken)); //claims 값 검증
+        assertEquals(deviceId, jwtUtil.getDeviceId(refreshToken));
     }
 
     @Test
@@ -88,8 +93,9 @@ class JwtUtilTest {
     @Test
     void 토큰_유효기간_확인() {
         //given
-        String accessToken = jwtUtil.generateAccessToken(1L, "홍길동", Role.ADMIN);
-        String refreshToken = jwtUtil.generateRefreshToken(3L);
+        String deviceId = UUID.randomUUID().toString();
+        String accessToken = jwtUtil.generateAccessToken(1L, "홍길동", Role.ADMIN, deviceId);
+        String refreshToken = jwtUtil.generateRefreshToken(3L, deviceId);
 
         //claims 추출
         Claims accessClaims = jwtUtil.getClaims(accessToken);
