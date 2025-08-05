@@ -6,6 +6,7 @@ import erp.greenagro.greenagro_erp_backend.dto.auth.TokenBundle;
 import erp.greenagro.greenagro_erp_backend.service.AuthService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -16,7 +17,7 @@ import java.time.Duration;
 public class AuthController {
 
     private final AuthService authService;
-    private final Duration REFRESH_TOKEN_EXP; // 7일 따로 고려
+    private final Duration REFRESH_TOKEN_EXP; // 7일
 
     //생성자
     public AuthController(AuthService authService, @Value("${spring.jwt.refresh-exp}") Duration refreshTokenExp) {
@@ -34,8 +35,11 @@ public class AuthController {
         //응답 DTO 생성
         AccessTokenResponse response = new AccessTokenResponse(tokenBundle.getAccessToken());
 
+        //refreshToken 쿠키 생성
+        ResponseCookie refreshTokenCookie = buildRefreshTokenCookie(tokenBundle.getRefreshToken(), REFRESH_TOKEN_EXP.toSeconds());
+
         return ResponseEntity.ok()
-                .header(HttpHeaders.SET_COOKIE, buildRefreshTokenCookie(tokenBundle.getRefreshToken()))
+                .header(HttpHeaders.SET_COOKIE, refreshTokenCookie.toString())
                 .body(response);
     }
 
@@ -52,8 +56,11 @@ public class AuthController {
         //응답 DTO 생성
         AccessTokenResponse response = new AccessTokenResponse(tokenBundle.getAccessToken());
 
+        //refreshToken 쿠키 생성
+        ResponseCookie refreshTokenCookie = buildRefreshTokenCookie(tokenBundle.getRefreshToken(), REFRESH_TOKEN_EXP.toSeconds());
+
         return ResponseEntity.ok()
-                .header(HttpHeaders.SET_COOKIE, buildRefreshTokenCookie(tokenBundle.getRefreshToken()))
+                .header(HttpHeaders.SET_COOKIE, refreshTokenCookie.toString())
                 .body(response);
     }
 
@@ -66,20 +73,33 @@ public class AuthController {
 
         authService.logout(refreshToken);
 
+        ResponseCookie refreshTokenCookie = buildRefreshTokenCookie("", 0L);
+
         return ResponseEntity.noContent()
-                //https 사용시 .header(HttpHeaders.SET_COOKIE, "\"refreshToken=; HttpOnly; Path=/; Max-Age=0; Secure; SameSite=None")
-                .header(HttpHeaders.SET_COOKIE, "refreshToken=; Max-Age=0; Path=/; HttpOnly")
+                .header(HttpHeaders.SET_COOKIE, refreshTokenCookie.toString())
                 .build();
     }
 
 
-
-    private String buildRefreshTokenCookie(String refreshToken){
+    private ResponseCookie buildRefreshTokenCookie(String refreshToken, Long maxAge){
         //http 사용
-        return String.format("refreshToken=%s; HttpOnly; Path=/; Max-Age=%s", refreshToken, REFRESH_TOKEN_EXP.toSeconds());
+        return ResponseCookie
+                .from("refreshToken", refreshToken)
+                .httpOnly(true)
+                .path("/")
+                .maxAge(maxAge)
+                .build();
 
         //https 사용
-        //return String.format("refreshToken=%s; HttpOnly; Path=/; Max-Age=%s; Secure; SameSite=None", refreshToken, REFRESH_TOKEN_EXP.toSeconds());
+//        return ResponseCookie
+//                .from("refreshToken", refreshToken)
+//                .httpOnly(true)
+//                .path("/")
+//                .maxAge(maAge)
+//                .secure(true)
+//                .sameSite("None")
+//                .build();
     }
+
 
 }
