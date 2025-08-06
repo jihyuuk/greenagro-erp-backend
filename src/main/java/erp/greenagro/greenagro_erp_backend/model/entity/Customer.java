@@ -51,6 +51,56 @@ public class Customer {
 
     private String customerManager; //거래처 담당자 (고객 회사 직원)
 
-    private String memo;        //비
+    private String memo;        //비고
 
+    private boolean deleted;    //삭제 여부(논리삭제)
+
+
+    public Customer(CustomerType customerType, SalesGroup salesGroup, String corpNo, String bizNo, String rrn, String bizName, String ceoName, String bizType, String bizItem, String tel, String phone, String addressMain, String addressSub, String fax, String email, String ourManager, String customerManager, String memo) {
+        this.customerType = customerType;
+        this.salesGroup = salesGroup;
+        this.corpNo = corpNo;
+        this.bizNo = bizNo;
+        this.rrn = rrn;
+        this.bizName = bizName;
+        this.ceoName = ceoName;
+        this.bizType = bizType;
+        this.bizItem = bizItem;
+        this.tel = tel;
+        this.phone = phone;
+        this.addressMain = addressMain;
+        this.addressSub = addressSub;
+        this.fax = fax;
+        this.email = email;
+        this.ourManager = ourManager;
+        this.customerManager = customerManager;
+        this.memo = memo;
+    }
+
+    //업데이트
+    public void update(CustomerType customerType, SalesGroup salesGroup, String corpNo, String bizNo, String rrn, String bizName, String ceoName, String bizType, String bizItem, String tel, String phone, String addressMain, String addressSub, String fax, String email, String ourManager, String customerManager, String memo) {
+        this.customerType = customerType;
+        this.salesGroup = salesGroup;
+        this.corpNo = corpNo;
+        this.bizNo = bizNo;
+        this.rrn = rrn;
+        this.bizName = bizName;
+        this.ceoName = ceoName;
+        this.bizType = bizType;
+        this.bizItem = bizItem;
+        this.tel = tel;
+        this.phone = phone;
+        this.addressMain = addressMain;
+        this.addressSub = addressSub;
+        this.fax = fax;
+        this.email = email;
+        this.ourManager = ourManager;
+        this.customerManager = customerManager;
+        this.memo = memo;
+    }
+
+    //논리 삭제
+    public void delete(){
+        this.deleted = true;
+    }
 }
