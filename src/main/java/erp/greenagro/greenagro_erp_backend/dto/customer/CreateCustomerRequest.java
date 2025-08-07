@@ -2,6 +2,7 @@ package erp.greenagro.greenagro_erp_backend.dto.customer;
 
 import erp.greenagro.greenagro_erp_backend.model.enums.CustomerType;
 import erp.greenagro.greenagro_erp_backend.model.enums.SalesGroup;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
@@ -9,8 +10,10 @@ import lombok.Getter;
 @AllArgsConstructor
 public class CreateCustomerRequest {
 
+    @NotNull
     private CustomerType customerType; //사업자 유형 (법인사업자, 개인사업자, 개인)
 
+    @NotNull
     private SalesGroup salesGroup;    //영업 분류 (조경, 농협, 관공서, 개인, 기타)
 
     private String corpNo;      //법인번호 (법인사업자만)
@@ -43,6 +46,6 @@ public class CreateCustomerRequest {
 
     private String customerManager; //거래처 담당자 (고객 회사 직원)
 
-    private String memo;        //비
+    private String memo;        //비고
 
 }

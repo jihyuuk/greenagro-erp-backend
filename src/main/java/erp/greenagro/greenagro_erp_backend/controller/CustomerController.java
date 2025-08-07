@@ -2,9 +2,9 @@ package erp.greenagro.greenagro_erp_backend.controller;
 
 import erp.greenagro.greenagro_erp_backend.dto.customer.*;
 import erp.greenagro.greenagro_erp_backend.service.CustomerService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.parameters.P;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -18,7 +18,7 @@ public class CustomerController {
 
     //고객 생성
     @PostMapping("/customers")
-    public ResponseEntity<CreateCustomerResponse> createCustomer(@RequestBody CreateCustomerRequest request){
+    public ResponseEntity<CreateCustomerResponse> createCustomer(@Valid @RequestBody CreateCustomerRequest request){
         CreateCustomerResponse response = customerService.createCustomer(request);
         return ResponseEntity.ok(response);
     }
@@ -50,7 +50,7 @@ public class CustomerController {
 
     //고객 수정
     @PutMapping("/customers/{id}")
-    public ResponseEntity<Void> updateCustomer(@PathVariable Long id, @RequestBody UpdateCustomerRequest request){
+    public ResponseEntity<Void> updateCustomer(@PathVariable Long id, @Valid @RequestBody UpdateCustomerRequest request){
         customerService.updateCustomer(id, request);
         return ResponseEntity.noContent().build();
     }
