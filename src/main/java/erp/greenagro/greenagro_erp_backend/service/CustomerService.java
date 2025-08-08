@@ -22,7 +22,7 @@ public class CustomerService {
     public CreateCustomerResponse createCustomer(CreateCustomerRequest request) {
         //1. 각종 검증
 
-        //2. 중복확인
+        //2. 중복확인 - 중복에 관해서는 열어두자! 추후 고려
 
         //3. 객체 생성 (주민번호의 경우 암호화 필요)
         Customer customer = customerMapper.fromCreate(request);
@@ -71,6 +71,8 @@ public class CustomerService {
         //1. 해당 고객 조회 (없으면 에러)
         Customer customer = customerRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("존재하지 않는 고객입니다. id:" + id));
 
+        //검증 추후 구현
+
         //2. 업데이트
         customer.update(
                 request.getCustomerType(),
@@ -102,7 +104,7 @@ public class CustomerService {
         Customer customer = customerRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("존재하지 않는 고객입니다. id:" + id));
 
         //2. 논리 삭제
-        customer.delete();
+        customer.delete(); //JPA 더티 체킹
     }
 
 
