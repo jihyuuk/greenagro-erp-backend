@@ -10,6 +10,8 @@ import lombok.Getter;
 @AllArgsConstructor
 public class CustomerSummaryResponse {
 
+    private Long id; //고객 번호
+
     private CustomerType customerType; //사업자 유형 (법인사업자, 개인사업자, 개인)
 
     private SalesGroup salesGroup;    //영업 분류 (조경, 농협, 관공서, 개인, 기타)
