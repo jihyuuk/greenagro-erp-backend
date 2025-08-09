@@ -22,4 +22,18 @@ public class WarehouseSite {
 
     private String code;        //코드 ex) ICN, GMP
 
+
+    public WarehouseSite(String name, String address, String code) {
+        this.name = name;
+        this.address = address;
+        this.code = code;
+    }
+
+
+    //수정하기
+    public void update(String name, String address, String code){
+        this.name = name;
+        this.address = address;
+        this.code = code;
+    }
 }
