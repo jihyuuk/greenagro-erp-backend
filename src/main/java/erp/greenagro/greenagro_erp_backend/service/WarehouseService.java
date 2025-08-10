@@ -7,13 +7,16 @@ import erp.greenagro.greenagro_erp_backend.dto.warehousesite.CreateWarehouseSite
 import erp.greenagro.greenagro_erp_backend.dto.warehousesite.CreateWarehouseSiteResponse;
 import erp.greenagro.greenagro_erp_backend.dto.warehousesite.UpdateWarehouseSiteRequest;
 import erp.greenagro.greenagro_erp_backend.dto.warehousesite.WarehouseSiteResponse;
+import erp.greenagro.greenagro_erp_backend.dto.warehousezone.CreateWarehouseZoneRequest;
+import erp.greenagro.greenagro_erp_backend.dto.warehousezone.CreateWarehouseZoneResponse;
+import erp.greenagro.greenagro_erp_backend.dto.warehousezone.UpdateWarehouseZoneRequest;
 import erp.greenagro.greenagro_erp_backend.model.entity.Warehouse;
 import erp.greenagro.greenagro_erp_backend.model.entity.WarehouseSite;
+import erp.greenagro.greenagro_erp_backend.model.entity.WarehouseZone;
 import erp.greenagro.greenagro_erp_backend.repository.WarehouseRepository;
 import erp.greenagro.greenagro_erp_backend.repository.WarehouseSiteRepository;
 import erp.greenagro.greenagro_erp_backend.repository.WarehouseZoneRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -131,7 +134,7 @@ public class WarehouseService {
         return new CreateWarehouseResponse(warehouse.getId());
     }
 
-    
+
     //창고 수정
     @Transactional
     public void updateWarehouse(Long id, UpdateWarehouseRequest request){
@@ -149,6 +152,45 @@ public class WarehouseService {
     }
 
 
-
     //존 생성, 수정, 삭제
+    //존 생성
+    @Transactional
+    public CreateWarehouseZoneResponse createWarehouseZone(CreateWarehouseZoneRequest request){
+
+        //1.창고 찾기
+        Warehouse warehouse = warehouseRepository.findById(request.getWarehouseId()).orElseThrow(() -> new IllegalArgumentException("존재하지 않는 창고 입니다. id:" + request.getWarehouseId()));
+
+        //2.검증
+        if(warehouseZoneRepository.existsByWarehouseAndName(warehouse, request.getName()))
+            throw new IllegalArgumentException("중복된 구역명 입니다. 이름:"+request.getName());
+        if(warehouseZoneRepository.existsByWarehouseAndCode(warehouse, request.getCode()))
+            throw new IllegalArgumentException("중복되는 구역 code 입니다. code:"+request.getCode());
+
+        //3.생성
+        WarehouseZone warehouseZone = new WarehouseZone(warehouse, request.getName(), request.getCode());
+
+        //4.저장
+        warehouseZoneRepository.save(warehouseZone);
+
+        //5.반환
+        return new CreateWarehouseZoneResponse(warehouseZone.getId());
+    }
+
+
+    //존 수정
+    @Transactional
+    public void updateWarehouseZone(Long id, UpdateWarehouseZoneRequest request){
+
+        //1. 창고 찾기
+        WarehouseZone warehouseZone = warehouseZoneRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("존재하지 않는 구역입니다. id:" + id));
+
+        //2. 검증
+        if(!warehouseZone.getName().equals(request.getName()) && warehouseZoneRepository.existsByWarehouseAndName(warehouseZone.getWarehouse(), request.getName()))
+            throw new IllegalArgumentException("중복된 창고명 입니다. 이름:"+request.getName());
+        if(!warehouseZone.getCode().equals(request.getCode()) && warehouseZoneRepository.existsByWarehouseAndCode(warehouseZone.getWarehouse(), request.getCode()))
+            throw new IllegalArgumentException("중복되는 창고 code 입니다. code:"+request.getCode());
+
+        //3. 업데이트
+        warehouseZone.update(request.getName(), request.getCode());
+    }
 }

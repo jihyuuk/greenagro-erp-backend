@@ -23,4 +23,17 @@ public class WarehouseZone {
 
     private String code;            //코드  ex)A, B, C, NONE
 
+
+    public WarehouseZone(Warehouse warehouse, String name, String code) {
+        this.warehouse = warehouse;
+        this.name = name;
+        this.code = code;
+    }
+
+
+    //수정하기
+    public void update(String name, String code){
+        this.name = name;
+        this.code = code;
+    }
 }

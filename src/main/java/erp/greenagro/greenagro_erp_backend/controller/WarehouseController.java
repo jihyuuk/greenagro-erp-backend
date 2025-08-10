@@ -7,6 +7,9 @@ import erp.greenagro.greenagro_erp_backend.dto.warehousesite.CreateWarehouseSite
 import erp.greenagro.greenagro_erp_backend.dto.warehousesite.CreateWarehouseSiteResponse;
 import erp.greenagro.greenagro_erp_backend.dto.warehousesite.UpdateWarehouseSiteRequest;
 import erp.greenagro.greenagro_erp_backend.dto.warehousesite.WarehouseSiteResponse;
+import erp.greenagro.greenagro_erp_backend.dto.warehousezone.CreateWarehouseZoneRequest;
+import erp.greenagro.greenagro_erp_backend.dto.warehousezone.CreateWarehouseZoneResponse;
+import erp.greenagro.greenagro_erp_backend.dto.warehousezone.UpdateWarehouseZoneRequest;
 import erp.greenagro.greenagro_erp_backend.service.WarehouseService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -64,6 +67,22 @@ public class WarehouseController {
     @PutMapping("/warehouses/{id}")
     public ResponseEntity<Void> updateWarehouse(@PathVariable Long id, @RequestBody UpdateWarehouseRequest request){
         warehouseService.updateWarehouse(id, request);
+        return ResponseEntity.noContent().build();
+    }
+
+
+    //창고 생성
+    @PostMapping("/warehouses-zone")
+    public ResponseEntity<CreateWarehouseZoneResponse> createWarehouseZone(@RequestBody CreateWarehouseZoneRequest request){
+        CreateWarehouseZoneResponse response = warehouseService.createWarehouseZone(request);
+        return ResponseEntity.ok(response);
+    }
+
+
+    //창고 수정
+    @PutMapping("/warehouses-zone/{id}")
+    public ResponseEntity<Void> updateWarehouseZone(@PathVariable Long id, @RequestBody UpdateWarehouseZoneRequest request){
+        warehouseService.updateWarehouseZone(id, request);
         return ResponseEntity.noContent().build();
     }
 
