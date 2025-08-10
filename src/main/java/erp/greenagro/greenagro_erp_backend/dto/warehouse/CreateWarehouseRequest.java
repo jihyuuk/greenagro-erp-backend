@@ -5,13 +5,11 @@ import lombok.Getter;
 
 @Getter
 @AllArgsConstructor
-public class WarehouseSiteResponse {
+public class CreateWarehouseRequest {
 
-    private Long id;
+    private Long warehouseSiteId;
 
     private String name;
-
-    private String address;
 
     private String code;
 

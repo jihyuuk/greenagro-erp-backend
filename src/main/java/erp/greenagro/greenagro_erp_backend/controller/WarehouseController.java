@@ -1,9 +1,12 @@
 package erp.greenagro.greenagro_erp_backend.controller;
 
-import erp.greenagro.greenagro_erp_backend.dto.warehouse.CreateWarehouseSiteRequest;
-import erp.greenagro.greenagro_erp_backend.dto.warehouse.CreateWarehouseSiteResponse;
-import erp.greenagro.greenagro_erp_backend.dto.warehouse.UpdateWarehouseSiteRequest;
-import erp.greenagro.greenagro_erp_backend.dto.warehouse.WarehouseSiteResponse;
+import erp.greenagro.greenagro_erp_backend.dto.warehouse.CreateWarehouseRequest;
+import erp.greenagro.greenagro_erp_backend.dto.warehouse.CreateWarehouseResponse;
+import erp.greenagro.greenagro_erp_backend.dto.warehouse.UpdateWarehouseRequest;
+import erp.greenagro.greenagro_erp_backend.dto.warehousesite.CreateWarehouseSiteRequest;
+import erp.greenagro.greenagro_erp_backend.dto.warehousesite.CreateWarehouseSiteResponse;
+import erp.greenagro.greenagro_erp_backend.dto.warehousesite.UpdateWarehouseSiteRequest;
+import erp.greenagro.greenagro_erp_backend.dto.warehousesite.WarehouseSiteResponse;
 import erp.greenagro.greenagro_erp_backend.service.WarehouseService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -47,4 +50,21 @@ public class WarehouseController {
         WarehouseSiteResponse response = warehouseService.getSite(id);
         return ResponseEntity.ok(response);
     }
+
+
+    //창고 생성
+    @PostMapping("/warehouses")
+    public ResponseEntity<CreateWarehouseResponse> createWarehouse(@RequestBody CreateWarehouseRequest request){
+        CreateWarehouseResponse response = warehouseService.createWarehouse(request);
+        return ResponseEntity.ok(response);
+    }
+
+
+    //창고 수정
+    @PutMapping("/warehouses/{id}")
+    public ResponseEntity<Void> updateWarehouse(@PathVariable Long id, @RequestBody UpdateWarehouseRequest request){
+        warehouseService.updateWarehouse(id, request);
+        return ResponseEntity.noContent().build();
+    }
+
 }

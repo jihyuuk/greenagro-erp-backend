@@ -21,4 +21,15 @@ public class Warehouse {
 
     private String code;        //코드 ex) 01, 02
 
+    public Warehouse(WarehouseSite warehouseSite, String name, String code) {
+        this.warehouseSite = warehouseSite;
+        this.name = name;
+        this.code = code;
+    }
+
+    //수정하기
+    public void update(String name, String code){
+        this.name = name;
+        this.code = code;
+    }
 }
