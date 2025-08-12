@@ -16,6 +16,22 @@ public class ProductGroup {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String name;    //그룹 이름
+    private String name;        //그룹 이름
 
+    private boolean deleted;   //삭제 여부
+
+
+    public ProductGroup(String name) {
+        this.name = name;
+    }
+
+    //수정하기
+    public void update(String name){
+        this.name = name;
+    }
+
+    //삭제하기
+    public void delete(){
+        this.deleted = true;
+    }
 }

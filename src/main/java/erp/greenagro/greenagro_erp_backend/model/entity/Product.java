@@ -45,4 +45,6 @@ public class Product {
 
     private String memo;                    //비고
 
+    private boolean deleted;                //삭제여부
+
 }
