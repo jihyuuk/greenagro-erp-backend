@@ -25,11 +25,11 @@ public class Product {
 
     private Long boxQuantity;               //박스 수량
 
-    @ManyToOne(fetch = FetchType.LAZY,optional = false)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "product_group_id")
     private ProductGroup productGroup;      //품목 그룹
 
-    @ManyToOne(fetch = FetchType.LAZY,optional = false)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "customer_id")
     private Customer customer;              //회사
 
@@ -47,4 +47,43 @@ public class Product {
 
     private boolean deleted;                //삭제여부
 
+
+    public Product(String imgUrl, String code, String name, String spec, Long boxQuantity, ProductGroup productGroup, Customer customer, TaxType taxType, DistChannel distChannel, Long purchasePrice, Long salePrice, String memo) {
+        this.imgUrl = imgUrl;
+        this.code = code;
+        this.name = name;
+        this.spec = spec;
+        this.boxQuantity = boxQuantity;
+        this.productGroup = productGroup;
+        this.customer = customer;
+        this.taxType = taxType;
+        this.distChannel = distChannel;
+        this.purchasePrice = purchasePrice;
+        this.salePrice = salePrice;
+        this.memo = memo;
+    }
+
+
+
+    //수정하기
+    public void update(String imgUrl, String code, String name, String spec, Long boxQuantity, ProductGroup productGroup, Customer customer, TaxType taxType, DistChannel distChannel, Long purchasePrice, Long salePrice, String memo) {
+        this.imgUrl = imgUrl;
+        this.code = code;
+        this.name = name;
+        this.spec = spec;
+        this.boxQuantity = boxQuantity;
+        this.productGroup = productGroup;
+        this.customer = customer;
+        this.taxType = taxType;
+        this.distChannel = distChannel;
+        this.purchasePrice = purchasePrice;
+        this.salePrice = salePrice;
+        this.memo = memo;
+    }
+
+
+    //삭제하기
+    public void delete(){
+        this.deleted = true;
+    }
 }
