@@ -30,20 +30,20 @@ public class ProductService {
     @Transactional
     public CreateProductResponse createProduct(CreateProductRequest request){
         //1. 검증 및 중복확인
-        if(productRepository.existsByCode(request.getCode()))
+        if(productRepository.existsByCodeAndDeletedFalse(request.getCode()))
             throw new IllegalArgumentException("중복된 품목 코드 입니다. code:"+request.getCode());
-        if(productRepository.existsByName(request.getName()))
+        if(productRepository.existsByNameAndDeletedFalse(request.getName()))
             throw new IllegalArgumentException("중복된 품목명 입니다. name:"+request.getName());
-        /**
-         * 문제 1) 그룹과 회사가 null일떄
-         * 문제 2) findById 인데 논리 삭제일땐 delete=false 적용해야함
-         */
 
         //2. 품목 그룹 조회
-        ProductGroup productGroup = productGroupRepository.findById(request.getProductGroupId()).orElseThrow(() -> new IllegalArgumentException("존재하지 않는 품목그룹입니다. id:" + request.getProductGroupId()));
+        ProductGroup productGroup = null;
+        if(request.getProductGroupId() != null)
+            productGroup = productGroupRepository.findByIdAndDeletedFalse(request.getProductGroupId()).orElseThrow(() -> new IllegalArgumentException("존재하지 않는 품목그룹입니다. id:" + request.getProductGroupId()));
 
         //3. 회사 조회
-        Customer customer = customerRepository.findById(request.getCustomerId()).orElseThrow(() -> new IllegalArgumentException("존재하지 않는 고객입니다. id:" + request.getCustomerId()));
+        Customer customer = null;
+        if(request.getCustomerId() != null)
+            customer = customerRepository.findByIdAndDeletedFalse(request.getCustomerId()).orElseThrow(() -> new IllegalArgumentException("존재하지 않는 고객입니다. id:" + request.getCustomerId()));
 
         //4. 엔티티 생성
         Product product = new Product(
@@ -77,21 +77,20 @@ public class ProductService {
         Product product = productRepository.findByIdAndDeletedFalse(id).orElseThrow(() -> new IllegalArgumentException("존재하지 않는 품목입니다. id:" + id));
 
         //2. 검증 및 중복확인
-        if(!product.getCode().equals(request.getCode()) && productRepository.existsByCode(request.getCode()))
+        if(!product.getCode().equals(request.getCode()) && productRepository.existsByCodeAndDeletedFalse(request.getCode()))
             throw new IllegalArgumentException("중복된 품목 코드 입니다. code:"+request.getCode());
-        if(!product.getName().equals(request.getName()) && productRepository.existsByName(request.getName()))
+        if(!product.getName().equals(request.getName()) && productRepository.existsByNameAndDeletedFalse(request.getName()))
             throw new IllegalArgumentException("중복된 품목명 입니다. name:"+request.getName());
 
-        /**
-         * 문제 1) 그룹과 회사가 null일떄
-         * 문제 2) findById 인데 논리 삭제일땐 delete=false 적용해야함
-         */
-
         //3. 품목 그룹 조회
-        ProductGroup productGroup = productGroupRepository.findById(request.getProductGroupId()).orElseThrow(() -> new IllegalArgumentException("존재하지 않는 품목그룹입니다. id:" + request.getProductGroupId()));
+        ProductGroup productGroup = null;
+        if(request.getProductGroupId() != null)
+            productGroup = productGroupRepository.findByIdAndDeletedFalse(request.getProductGroupId()).orElseThrow(() -> new IllegalArgumentException("존재하지 않는 품목그룹입니다. id:" + request.getProductGroupId()));
 
         //4. 회사 조회
-        Customer customer = customerRepository.findById(request.getCustomerId()).orElseThrow(() -> new IllegalArgumentException("존재하지 않는 고객입니다. id:" + request.getCustomerId()));
+        Customer customer = null;
+        if(request.getCustomerId() != null)
+            customer = customerRepository.findByIdAndDeletedFalse(request.getCustomerId()).orElseThrow(() -> new IllegalArgumentException("존재하지 않는 고객입니다. id:" + request.getCustomerId()));
 
 
         //5. 수정하기
@@ -155,8 +154,8 @@ public class ProductService {
                 product.getName(),
                 product.getSpec(),
                 product.getBoxQuantity(),
-                product.getProductGroup(),
-                product.getCustomer(),
+                new ProductGroupDTO(product.getProductGroup().getId(), product.getProductGroup().getName()),
+                new CustomerDTO(product.getCustomer().getId(), product.getCustomer().getBizName()),
                 product.getTaxType(),
                 product.getDistChannel(),
                 product.getPurchasePrice(),
