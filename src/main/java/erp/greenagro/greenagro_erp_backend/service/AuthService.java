@@ -2,6 +2,7 @@ package erp.greenagro.greenagro_erp_backend.service;
 
 import erp.greenagro.greenagro_erp_backend.dto.auth.LoginRequest;
 import erp.greenagro.greenagro_erp_backend.dto.auth.TokenBundle;
+import erp.greenagro.greenagro_erp_backend.exception.CustomException;
 import erp.greenagro.greenagro_erp_backend.helper.PasswordHelper;
 import erp.greenagro.greenagro_erp_backend.model.entity.Employee;
 import erp.greenagro.greenagro_erp_backend.model.enums.AccountStatus;
@@ -11,6 +12,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.UUID;
+
+import static erp.greenagro.greenagro_erp_backend.model.enums.ErrorCode.*;
 
 @Service
 @RequiredArgsConstructor
@@ -25,16 +28,17 @@ public class AuthService {
     //아이디 비번으로 로그인
     public TokenBundle login(LoginRequest request){
         //username 으로 직원 조회
-        Employee employee = employeeRepository.findByName(request.getUsername()).orElseThrow(() -> new IllegalArgumentException("존재하지 않는 직원입니다. 이름: " + request.getUsername()));
+        Employee employee = employeeRepository.findByName(request.getUsername())
+                .orElseThrow(() -> new CustomException(INVALID_CREDENTIALS));
 
         //계정 상태 확인 (ACTIVE 만 로그인 가능)
         if(employee.getStatus() != AccountStatus.ACTIVE){
-            throw new IllegalArgumentException("계정상태 로그인 불가");
+            throw new CustomException(INVALID_CREDENTIALS);
         }
 
         //비밀번호 매칭 확인
         if(isNotMatchesPassword(request.getPassword(), employee.getPassword())){
-            throw new IllegalArgumentException("비밀번호가 다릅니다.");
+            throw new CustomException(INVALID_CREDENTIALS);
         }
 
         //기기 식별자 생성 <- 현재는 서버에서 생성하지만 클라에서 생성하는 것도 고려 필요
@@ -57,7 +61,7 @@ public class AuthService {
 
         //1. 토큰 유효성 검사
         if (!jwtUtil.validateToken(refreshToken)) {
-            throw new IllegalArgumentException("유효하지 않은 토큰입니다.");
+            throw new CustomException(TOKEN_REFRESH_FAILED);
         }
 
         //2. 직원 id, 기기 식별자 추출
@@ -69,7 +73,7 @@ public class AuthService {
             //redis 에서 지우기
             refreshTokenRedisService.delete(employeeId, deviceId);
             //예외 던지기
-            throw new IllegalArgumentException("이미 사용된 refresh token 입니다.");
+            throw new CustomException(TOKEN_REFRESH_FAILED);
         }
 
         //4. 직원 DB 조회
@@ -77,7 +81,7 @@ public class AuthService {
 
         //4-1.계정 상태 확인 (ACTIVE 만 로그인 가능)
         if(employee.getStatus() != AccountStatus.ACTIVE){
-            throw new IllegalArgumentException("계정상태 로그인 불가");
+            throw new CustomException(TOKEN_REFRESH_FAILED);
         }
 
         //5. 토큰 재발급
@@ -95,7 +99,7 @@ public class AuthService {
     public void logout(String refreshToken){
         //1. 토큰 유효성 검사
         if (!jwtUtil.validateToken(refreshToken)) {
-            throw new IllegalArgumentException("유효하지 않은 토큰입니다.");
+            throw new CustomException(INVALID_TOKEN);
         }
 
         //2. 클레임 추출

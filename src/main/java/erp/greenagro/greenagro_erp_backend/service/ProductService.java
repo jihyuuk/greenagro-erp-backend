@@ -5,6 +5,8 @@ import erp.greenagro.greenagro_erp_backend.dto.product.*;
 import erp.greenagro.greenagro_erp_backend.dto.productgroup.CreateProductGroupRequest;
 import erp.greenagro.greenagro_erp_backend.dto.productgroup.CreateProductGroupResponse;
 import erp.greenagro.greenagro_erp_backend.dto.productgroup.ProductGroupDTO;
+import erp.greenagro.greenagro_erp_backend.exception.DuplicateValueException;
+import erp.greenagro.greenagro_erp_backend.exception.ResourceInUseException;
 import erp.greenagro.greenagro_erp_backend.model.entity.Customer;
 import erp.greenagro.greenagro_erp_backend.model.entity.Product;
 import erp.greenagro.greenagro_erp_backend.model.entity.ProductGroup;
@@ -16,6 +18,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -31,9 +34,9 @@ public class ProductService {
     public CreateProductResponse createProduct(CreateProductRequest request){
         //1. 검증 및 중복확인
         if(productRepository.existsByCode(request.getCode()))
-            throw new IllegalArgumentException("중복된 품목 코드 입니다. code:"+request.getCode());
+            throw new DuplicateValueException(Map.of("code",request.getCode()));
         if(productRepository.existsByName(request.getName()))
-            throw new IllegalArgumentException("중복된 품목명 입니다. name:"+request.getName());
+            throw new DuplicateValueException(Map.of("name",request.getName()));
 
         //2. 품목 그룹 조회
         ProductGroup productGroup = null;
@@ -78,9 +81,9 @@ public class ProductService {
 
         //2. 검증 및 중복확인
         if(!product.getCode().equals(request.getCode()) && productRepository.existsByCode(request.getCode()))
-            throw new IllegalArgumentException("중복된 품목 코드 입니다. code:"+request.getCode());
+            throw new DuplicateValueException(Map.of("code", request.getCode()));
         if(!product.getName().equals(request.getName()) && productRepository.existsByName(request.getName()))
-            throw new IllegalArgumentException("중복된 품목명 입니다. name:"+request.getName());
+            throw new DuplicateValueException(Map.of("name", request.getName()));
 
         //3. 품목 그룹 조회
         ProductGroup productGroup = null;
@@ -182,7 +185,7 @@ public class ProductService {
     public CreateProductGroupResponse createGroup(CreateProductGroupRequest request){
         //1. 검증 및 중복검사
         if(productGroupRepository.existsByName(request.getName()))
-            throw new IllegalArgumentException("중복된 품목그룹명 입니다. 이름:"+request.getName());
+            throw new DuplicateValueException(java.util.Map.of("name", request.getName()));
 
         //2. 엔티티 생성
         ProductGroup productGroup = new ProductGroup(request.getName());
@@ -203,7 +206,8 @@ public class ProductService {
 
         //2. 검증 및 중복검사
         if(!productGroup.getName().equals(request.getName()) && productGroupRepository.existsByName(request.getName()))
-            throw new IllegalArgumentException("중복된 품목그룹명 입니다. 이름:"+request.getName());
+            throw new DuplicateValueException(java.util.Map.of("name", request.getName()));
+
 
         //3. 업데이트
         productGroup.update(request.getName());
@@ -234,6 +238,7 @@ public class ProductService {
 
         //2. 상품 있으면 삭제 불가 <- 나중에 자세히 리스트업 하기
         if(productRepository.existsByProductGroup(productGroup))
+            //throw new ResourceInUseException(Map.of());
             throw new IllegalArgumentException("해당 품목 그룹에 해당하는 품목이 있어서 삭제가 불가능합니다. ");
 
         //3. 삭제
