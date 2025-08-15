@@ -7,9 +7,11 @@ import jakarta.persistence.Id;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.SoftDelete;
 
 @Entity
 @Getter
+@SoftDelete
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class ProductGroup {
 
@@ -17,8 +19,6 @@ public class ProductGroup {
     private Long id;
 
     private String name;        //그룹 이름
-
-    private boolean deleted;   //삭제 여부
 
 
     public ProductGroup(String name) {
@@ -30,8 +30,4 @@ public class ProductGroup {
         this.name = name;
     }
 
-    //삭제하기
-    public void delete(){
-        this.deleted = true;
-    }
 }

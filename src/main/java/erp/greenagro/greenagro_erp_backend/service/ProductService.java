@@ -38,7 +38,7 @@ public class ProductService {
         //2. 품목 그룹 조회
         ProductGroup productGroup = null;
         if(request.getProductGroupId() != null)
-            productGroup = productGroupRepository.findByIdAndDeletedFalse(request.getProductGroupId()).orElseThrow(() -> new IllegalArgumentException("존재하지 않는 품목그룹입니다. id:" + request.getProductGroupId()));
+            productGroup = productGroupRepository.findById(request.getProductGroupId()).orElseThrow(() -> new IllegalArgumentException("존재하지 않는 품목그룹입니다. id:" + request.getProductGroupId()));
 
         //3. 회사 조회
         Customer customer = null;
@@ -85,7 +85,7 @@ public class ProductService {
         //3. 품목 그룹 조회
         ProductGroup productGroup = null;
         if(request.getProductGroupId() != null)
-            productGroup = productGroupRepository.findByIdAndDeletedFalse(request.getProductGroupId()).orElseThrow(() -> new IllegalArgumentException("존재하지 않는 품목그룹입니다. id:" + request.getProductGroupId()));
+            productGroup = productGroupRepository.findById(request.getProductGroupId()).orElseThrow(() -> new IllegalArgumentException("존재하지 않는 품목그룹입니다. id:" + request.getProductGroupId()));
 
         //4. 회사 조회
         Customer customer = null;
@@ -181,7 +181,7 @@ public class ProductService {
     @Transactional
     public CreateProductGroupResponse createGroup(CreateProductGroupRequest request){
         //1. 검증 및 중복검사
-        if(productGroupRepository.existsByNameAndDeletedFalse(request.getName()))
+        if(productGroupRepository.existsByName(request.getName()))
             throw new IllegalArgumentException("중복된 품목그룹명 입니다. 이름:"+request.getName());
 
         //2. 엔티티 생성
@@ -199,10 +199,10 @@ public class ProductService {
     @Transactional
     public void updateGroup(Long id, ProductGroupDTO request){
         //1. 해당 품목그룹 조회
-        ProductGroup productGroup = productGroupRepository.findByIdAndDeletedFalse(id).orElseThrow(()->new IllegalArgumentException("존재하지 않는 품목그룹입니다. id:" + request.getId()));
+        ProductGroup productGroup = productGroupRepository.findById(id).orElseThrow(()->new IllegalArgumentException("존재하지 않는 품목그룹입니다. id:" + request.getId()));
 
         //2. 검증 및 중복검사
-        if(!productGroup.getName().equals(request.getName()) && productGroupRepository.existsByNameAndDeletedFalse(request.getName()))
+        if(!productGroup.getName().equals(request.getName()) && productGroupRepository.existsByName(request.getName()))
             throw new IllegalArgumentException("중복된 품목그룹명 입니다. 이름:"+request.getName());
 
         //3. 업데이트
@@ -214,7 +214,7 @@ public class ProductService {
     @Transactional(readOnly = true)
     public List<ProductGroupDTO> getAllGroups(){
         //전체 조회(deleted = false)
-        List<ProductGroup> groups = productGroupRepository.findAllByDeletedFalse();
+        List<ProductGroup> groups = productGroupRepository.findAll();
 
         //dto 변환
         return groups.stream().map(group ->
@@ -230,14 +230,14 @@ public class ProductService {
     @Transactional
     public void deleteGroup(Long id){
         //1. 해당 품목그룹 조회
-        ProductGroup productGroup = productGroupRepository.findByIdAndDeletedFalse(id).orElseThrow(()->new IllegalArgumentException("존재하지 않는 품목그룹입니다. id:" + id));
+        ProductGroup productGroup = productGroupRepository.findById(id).orElseThrow(()->new IllegalArgumentException("존재하지 않는 품목그룹입니다. id:" + id));
 
         //2. 상품 있으면 삭제 불가 <- 나중에 자세히 리스트업 하기
         if(productRepository.existsByProductGroup(productGroup))
             throw new IllegalArgumentException("해당 품목 그룹에 해당하는 품목이 있어서 삭제가 불가능합니다. ");
 
         //3. 삭제
-        productGroup.delete();
+        productGroupRepository.delete(productGroup);
     }
 
 

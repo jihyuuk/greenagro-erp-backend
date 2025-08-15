@@ -337,7 +337,6 @@ class ProductServiceTest {
         ProductGroup group = productGroupRepository.findById(response.getProductId()).orElseThrow();
         assertNotNull(response.getProductId());
         assertEquals(request.getName(), group.getName());
-        assertFalse(group.isDeleted());
     }
 
 
@@ -408,7 +407,8 @@ class ProductServiceTest {
         productService.deleteGroup(group.getId());
 
         //then
-        assertTrue(group.isDeleted());
+        assertNull(productGroupRepository.findById(group.getId()).orElse(null)); //findById 논리 삭제 테스트
+        assertFalse(productGroupRepository.existsById(group.getId())); //existsById 논리 삭제 테스트
     }
 
 
