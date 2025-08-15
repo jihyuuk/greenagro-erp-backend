@@ -6,9 +6,11 @@ import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.SoftDelete;
 
 @Getter
 @Entity
+@SoftDelete
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Customer {
 
@@ -53,8 +55,6 @@ public class Customer {
 
     private String memo;        //비고
 
-    private boolean deleted;    //삭제 여부(논리삭제)
-
 
     public Customer(CustomerType customerType, SalesGroup salesGroup, String corpNo, String bizNo, String rrn, String bizName, String ceoName, String bizType, String bizItem, String tel, String phone, String addressMain, String addressSub, String fax, String email, String ourManager, String customerManager, String memo) {
         this.customerType = customerType;
@@ -76,6 +76,7 @@ public class Customer {
         this.customerManager = customerManager;
         this.memo = memo;
     }
+
 
     //업데이트
     public void update(CustomerType customerType, SalesGroup salesGroup, String corpNo, String bizNo, String rrn, String bizName, String ceoName, String bizType, String bizItem, String tel, String phone, String addressMain, String addressSub, String fax, String email, String ourManager, String customerManager, String memo) {
@@ -99,8 +100,4 @@ public class Customer {
         this.memo = memo;
     }
 
-    //논리 삭제
-    public void delete(){
-        this.deleted = true;
-    }
 }

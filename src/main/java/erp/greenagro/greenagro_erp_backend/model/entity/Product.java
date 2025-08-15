@@ -25,11 +25,11 @@ public class Product {
 
     private Long boxQuantity;               //박스 수량
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne
     @JoinColumn(name = "product_group_id")
     private ProductGroup productGroup;      //품목 그룹
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne
     @JoinColumn(name = "customer_id")
     private Customer customer;              //회사
 

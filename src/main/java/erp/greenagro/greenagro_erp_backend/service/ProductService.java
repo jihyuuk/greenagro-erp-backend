@@ -43,7 +43,7 @@ public class ProductService {
         //3. 회사 조회
         Customer customer = null;
         if(request.getCustomerId() != null)
-            customer = customerRepository.findByIdAndDeletedFalse(request.getCustomerId()).orElseThrow(() -> new IllegalArgumentException("존재하지 않는 고객입니다. id:" + request.getCustomerId()));
+            customer = customerRepository.findById(request.getCustomerId()).orElseThrow(() -> new IllegalArgumentException("존재하지 않는 고객입니다. id:" + request.getCustomerId()));
 
         //4. 엔티티 생성
         Product product = new Product(
@@ -90,7 +90,7 @@ public class ProductService {
         //4. 회사 조회
         Customer customer = null;
         if(request.getCustomerId() != null)
-            customer = customerRepository.findByIdAndDeletedFalse(request.getCustomerId()).orElseThrow(() -> new IllegalArgumentException("존재하지 않는 고객입니다. id:" + request.getCustomerId()));
+            customer = customerRepository.findById(request.getCustomerId()).orElseThrow(() -> new IllegalArgumentException("존재하지 않는 고객입니다. id:" + request.getCustomerId()));
 
 
         //5. 수정하기
