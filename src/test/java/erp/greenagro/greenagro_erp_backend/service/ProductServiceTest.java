@@ -302,8 +302,8 @@ class ProductServiceTest {
         productService.deleteProduct(product.getId());
 
         //then
-        Product deletedProduct = productRepository.findById(product.getId()).orElseThrow();
-        assertTrue(deletedProduct.isDeleted());
+        assertNull(productRepository.findById(product.getId()).orElse(null)); //findById 논리 삭제 테스트
+        assertFalse(productRepository.existsById(product.getId())); //existsById 논리 삭제 테스트
     }
 
 
@@ -422,7 +422,7 @@ class ProductServiceTest {
         assertThrows(IllegalArgumentException.class, () -> productService.deleteGroup(group.getId()));
 
         //when - 품목 지우기
-        product.delete();
+        productRepository.delete(product);
         //then - 그룹에 속한 품목이 없어서 삭제 가능!
         productService.deleteGroup(group.getId());
     }

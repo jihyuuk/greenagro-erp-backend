@@ -6,9 +6,11 @@ import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.SoftDelete;
 
 @Getter
 @Entity
+@SoftDelete
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Product {
 
@@ -45,8 +47,6 @@ public class Product {
 
     private String memo;                    //비고
 
-    private boolean deleted;                //삭제여부
-
 
     public Product(String imgUrl, String code, String name, String spec, Long boxQuantity, ProductGroup productGroup, Customer customer, TaxType taxType, DistChannel distChannel, Long purchasePrice, Long salePrice, String memo) {
         this.imgUrl = imgUrl;
@@ -81,9 +81,4 @@ public class Product {
         this.memo = memo;
     }
 
-
-    //삭제하기
-    public void delete(){
-        this.deleted = true;
-    }
 }
