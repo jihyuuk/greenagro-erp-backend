@@ -1,13 +1,14 @@
 package erp.greenagro.greenagro_erp_backend.model.entity;
 
-import erp.greenagro.greenagro_erp_backend.model.entity.Warehouse;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.SoftDelete;
 
 @Entity
 @Getter
+@SoftDelete
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class WarehouseZone {
 
@@ -15,7 +16,7 @@ public class WarehouseZone {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @ManyToOne
     @JoinColumn(name = "warehouse_id", nullable = false)
     private Warehouse warehouse;    //속한 창고
 
