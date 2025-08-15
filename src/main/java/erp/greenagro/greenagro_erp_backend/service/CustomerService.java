@@ -39,7 +39,7 @@ public class CustomerService {
     @Transactional(readOnly = true)
     public List<CustomerSummaryResponse> getAllCustomers() {
 
-        return customerRepository.findAllByDeletedFalse().stream().map(customer ->
+        return customerRepository.findAll().stream().map(customer ->
                 customerMapper.toSummary(customer)
         ).toList();
     }
@@ -104,7 +104,7 @@ public class CustomerService {
         Customer customer = customerRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("존재하지 않는 고객입니다. id:" + id));
 
         //2. 논리 삭제
-        customer.delete(); //JPA 더티 체킹
+        customerRepository.delete(customer);
     }
 
 

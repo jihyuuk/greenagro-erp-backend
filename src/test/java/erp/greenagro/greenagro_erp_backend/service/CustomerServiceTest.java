@@ -4,6 +4,7 @@ import erp.greenagro.greenagro_erp_backend.dto.customer.*;
 import erp.greenagro.greenagro_erp_backend.model.entity.Customer;
 import erp.greenagro.greenagro_erp_backend.model.enums.*;
 import erp.greenagro.greenagro_erp_backend.repository.CustomerRepository;
+import jakarta.persistence.EntityManager;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,12 +26,14 @@ class CustomerServiceTest {
     CustomerService customerService;
     @Autowired
     CustomerRepository customerRepository;
+    @Autowired
+    EntityManager em;
 
     private Long dummyId;
 
 
     @Test
-    void 고객_생성() {
+    void 고객_생성_정상() {
         //given
         CreateCustomerRequest request = generateCreateCustomerRequest();
 
@@ -61,7 +64,6 @@ class CustomerServiceTest {
         assertEquals(request.getOurManager(), customer.getOurManager());
         assertEquals(request.getCustomerManager(), customer.getCustomerManager());
         assertEquals(request.getMemo(), customer.getMemo());
-
     }
 
 
@@ -111,7 +113,7 @@ class CustomerServiceTest {
         CustomerSummaryResponse summaryDto = allCustomers.stream().filter(dto -> dto.getId() == customer.getId()).findFirst().orElseThrow();
 
         //then
-        assertEquals(customerRepository.findAllByDeletedFalse().size(), allCustomers.size());
+        assertEquals(customerRepository.findAll().size(), allCustomers.size());
         assertEquals(customer.getId(), summaryDto.getId());
         assertEquals(customer.getCustomerType(), summaryDto.getCustomerType());
         assertEquals(customer.getSalesGroup(), summaryDto.getSalesGroup());
@@ -182,14 +184,13 @@ class CustomerServiceTest {
     void 고객_논리_삭제() {
         //given
         Customer customer = customerRepository.findById(dummyId).orElseThrow(() -> new IllegalArgumentException("더미 고객 찾기 실패 Id:" + dummyId));
-        assertFalse(customer.isDeleted()); //삭제 전 isDeleted = false;
 
         //when
-        customerService.deleteCustomer(dummyId); //삭제 수행
+        customerService.deleteCustomer(customer.getId()); //삭제 수행
 
         //then
-        Customer afterCustomer = customerRepository.findById(dummyId).orElseThrow(() -> new IllegalArgumentException("더미 고객 찾기 실패 Id:" + dummyId));
-        assertTrue(afterCustomer.isDeleted()); //삭제 후 isDeleted = true;
+        assertNull(customerRepository.findById(customer.getId()).orElse(null)); //findById 논리 삭제 테스트
+        assertFalse(customerRepository.existsById(customer.getId())); //existsById 논리 삭제 테스트
     }
 
 
@@ -199,18 +200,18 @@ class CustomerServiceTest {
     void initData() {
         //더미 고객 생성
         Customer customer = new Customer(
-                CustomerType.INDIVIDUAL,                      // customerType
-                SalesGroup.NONGHYUP,                          // salesGroup
+                CustomerType.INDIVIDUAL,            // customerType
+                SalesGroup.NONGHYUP,               // salesGroup
                 "1234567890123",                   // corpNo
                 "9876543210",                      // bizNo
                 "900101-1234567",                  // rrn
-                "테스트 상호명",                    // bizName
+                "테스트 상호명",                     // bizName
                 "홍길동",                           // ceoName
                 "도소매",                           // bizType
                 "농자재",                           // bizItem
                 "02-123-4567",                     // tel
                 "010-1234-5678",                   // phone
-                "서울특별시 강남구 테헤란로 123",   // addressMain
+                "서울특별시 강남구 테헤란로 123",       // addressMain
                 "101호",                           // addressSub
                 "02-987-6543",                     // fax
                 "test@example.com",                // email
@@ -228,18 +229,18 @@ class CustomerServiceTest {
 
     private CreateCustomerRequest generateCreateCustomerRequest() {
         return new CreateCustomerRequest(
-                CustomerType.INDIVIDUAL,                      // customerType
-                SalesGroup.NONGHYUP,                          // salesGroup
+                CustomerType.INDIVIDUAL,           // customerType
+                SalesGroup.NONGHYUP,               // salesGroup
                 "1234567890123",                   // corpNo
                 "9876543210",                      // bizNo
                 "900101-1234567",                  // rrn
-                "테스트 상호명",                    // bizName
+                "테스트 상호명",                      // bizName
                 "홍길동",                           // ceoName
                 "도소매",                           // bizType
                 "농자재",                           // bizItem
                 "02-123-4567",                     // tel
                 "010-1234-5678",                   // phone
-                "서울특별시 강남구 테헤란로 123",   // addressMain
+                "서울특별시 강남구 테헤란로 123",        // addressMain
                 "101호",                           // addressSub
                 "02-987-6543",                     // fax
                 "test@example.com",                // email
@@ -252,18 +253,18 @@ class CustomerServiceTest {
 
     private UpdateCustomerRequest generateUpdateCustomerRequest() {
         return new UpdateCustomerRequest(
-                CustomerType.CORPORATION,                      // customerType
-                SalesGroup.ETC,                          // salesGroup
-                "1234567890123 업데이트",                   // corpNo
-                "9876543210 업데이트",                      // bizNo
-                "900101-1234567 업데이트",                  // rrn
+                CustomerType.CORPORATION,              // customerType
+                SalesGroup.ETC,                        // salesGroup
+                "1234567890123 업데이트",                 // corpNo
+                "9876543210 업데이트",                    // bizNo
+                "900101-1234567 업데이트",                // rrn
                 "테스트 상호명 업데이트",                    // bizName
-                "홍길동 업데이트",                           // ceoName
-                "도소매 업데이트",                           // bizType
-                "농자재 업데이트",                           // bizItem
-                "02-123-4567 업데이트",                     // tel
-                "010-1234-5678 업데이트",                   // phone
-                "서울특별시 강남구 테헤란로 123 업데이트",   // addressMain
+                "홍길동 업데이트",                          // ceoName
+                "도소매 업데이트",                          // bizType
+                "농자재 업데이트",                          // bizItem
+                "02-123-4567 업데이트",                    // tel
+                "010-1234-5678 업데이트",                  // phone
+                "서울특별시 강남구 테헤란로 123 업데이트",       // addressMain
                 "101호 업데이트",                           // addressSub
                 "02-987-6543 업데이트",                     // fax
                 "test@example.com 업데이트",                // email

@@ -4,16 +4,18 @@ import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.SoftDelete;
 
 @Entity
 @Getter
+@SoftDelete
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Warehouse {
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @ManyToOne
     @JoinColumn(name = "warehouse_site_id", nullable = false)
     private WarehouseSite warehouseSite; //거점명 (인천점, 김포점)
 

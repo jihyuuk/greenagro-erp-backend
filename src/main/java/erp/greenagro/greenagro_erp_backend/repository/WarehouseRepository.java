@@ -12,5 +12,4 @@ public interface WarehouseRepository extends JpaRepository<Warehouse, Long> {
 
     boolean existsByWarehouseSiteAndCode(WarehouseSite warehouseSite, String code);
 
-
 }
