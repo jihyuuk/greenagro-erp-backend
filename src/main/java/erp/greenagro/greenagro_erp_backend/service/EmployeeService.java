@@ -2,6 +2,7 @@ package erp.greenagro.greenagro_erp_backend.service;
 
 import erp.greenagro.greenagro_erp_backend.dto.branch.BranchSummaryResponse;
 import erp.greenagro.greenagro_erp_backend.dto.employee.*;
+import erp.greenagro.greenagro_erp_backend.dto.exception.DuplicatedField;
 import erp.greenagro.greenagro_erp_backend.dto.payinfo.PayInfoDTO;
 import erp.greenagro.greenagro_erp_backend.exception.DuplicateValueException;
 import erp.greenagro.greenagro_erp_backend.helper.PasswordHelper;
@@ -39,10 +40,15 @@ public class EmployeeService {
     //직원 등록
     @Transactional
     public CreateEmployeeResponse createEmployee(CreateEmployeeRequest request) {
-        //이름 중복여부 체크
+        //중복 체크
+        List<DuplicatedField> conflicts = new ArrayList<>();
+
         if (employeeRepository.existsByName(request.getName())) {
-            throw new DuplicateValueException(Map.of("name", request.getName()));
+            conflicts.add(new DuplicatedField("name", request.getName()));
         }
+
+        if(!conflicts.isEmpty())
+            throw new DuplicateValueException(conflicts);
 
         //지점 조회하기
         Branch branch = getBranchOrThrow(request.getBranchId());
