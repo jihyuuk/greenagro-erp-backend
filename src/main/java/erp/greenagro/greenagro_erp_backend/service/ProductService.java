@@ -1,25 +1,22 @@
 package erp.greenagro.greenagro_erp_backend.service;
 
 import erp.greenagro.greenagro_erp_backend.dto.customer.CustomerDTO;
-import erp.greenagro.greenagro_erp_backend.dto.exception.DuplicatedField;
 import erp.greenagro.greenagro_erp_backend.dto.product.*;
 import erp.greenagro.greenagro_erp_backend.dto.productgroup.CreateProductGroupRequest;
 import erp.greenagro.greenagro_erp_backend.dto.productgroup.CreateProductGroupResponse;
 import erp.greenagro.greenagro_erp_backend.dto.productgroup.ProductGroupDTO;
-import erp.greenagro.greenagro_erp_backend.exception.DuplicateValueException;
 import erp.greenagro.greenagro_erp_backend.model.entity.Customer;
 import erp.greenagro.greenagro_erp_backend.model.entity.Product;
 import erp.greenagro.greenagro_erp_backend.model.entity.ProductGroup;
 import erp.greenagro.greenagro_erp_backend.repository.CustomerRepository;
 import erp.greenagro.greenagro_erp_backend.repository.ProductGroupRepository;
 import erp.greenagro.greenagro_erp_backend.repository.ProductRepository;
+import erp.greenagro.greenagro_erp_backend.validator.DuplicationValidator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -34,20 +31,11 @@ public class ProductService {
     @Transactional
     public CreateProductResponse createProduct(CreateProductRequest request){
 
-        //1. 중복 체크
-        List<DuplicatedField> conflicts = new ArrayList<>();
-
-        //1-1. code 중복 체크
-        if(productRepository.existsByCode(request.getCode()))
-            conflicts.add(new DuplicatedField("code", request.getCode()));
-
-        //1-2. name 중복 체크
-        if(productRepository.existsByName(request.getName()))
-            conflicts.add(new DuplicatedField("name", request.getName()));
-
-        //1-3. 중복된 값이 하나라도 있으면 예외
-        if(!conflicts.isEmpty())
-            throw new DuplicateValueException(conflicts);
+        //1. 중복 체크 - code, name
+        DuplicationValidator.validate(dv -> dv
+                .check(productRepository.existsByCode(request.getCode()), "code", request.getCode())
+                .check(productRepository.existsByName(request.getName()), "name", request.getName())
+        );
 
 
         //2. 품목 그룹 조회
@@ -91,20 +79,11 @@ public class ProductService {
         //1. 해당 품목 조회
         Product product = productRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("존재하지 않는 품목입니다. id:" + id));
 
-        //2. 중복 체크하기
-        List<DuplicatedField> conflicts = new ArrayList<>();
-
-        //2-1. code 중복 체크
-        if(!product.getCode().equals(request.getCode()) && productRepository.existsByCode(request.getCode()))
-            conflicts.add(new DuplicatedField("code", request.getCode()));
-
-        //2-2. name 중복 체크
-        if(!product.getName().equals(request.getName()) && productRepository.existsByName(request.getName()))
-            conflicts.add(new DuplicatedField("name", request.getName()));
-
-        //2-3. 중복된 값이 하나라도 있으면 예외
-        if(!conflicts.isEmpty())
-            throw new DuplicateValueException(conflicts);
+        //2. 중복 체크 - 품목코드, 품목명
+        DuplicationValidator.validate(dv -> dv
+                .check(!product.getCode().equals(request.getCode()) && productRepository.existsByCode(request.getCode()), "code", request.getCode())
+                .check(!product.getName().equals(request.getName()) && productRepository.existsByName(request.getName()), "name", request.getName())
+        );
 
         //3. 품목 그룹 조회
         ProductGroup productGroup = null;
@@ -204,17 +183,11 @@ public class ProductService {
     //그룹 생성
     @Transactional
     public CreateProductGroupResponse createGroup(CreateProductGroupRequest request){
-        //1. 중복 체크
-        List<DuplicatedField> conflicts = new ArrayList<>();
 
-        //1-1. name 중복 체크
-        if(productGroupRepository.existsByName(request.getName()))
-            conflicts.add(new DuplicatedField("name", request.getName()));
-
-        //1-3. 중복된 값이 하나라도 있으면 예외
-        if(!conflicts.isEmpty())
-            throw new DuplicateValueException(conflicts);
-
+        //1. 중복 체크 - 그룹명
+        DuplicationValidator.validate(dv -> dv
+                .check(productGroupRepository.existsByName(request.getName()), "name", request.getName())
+        );
 
         //2. 엔티티 생성
         ProductGroup productGroup = new ProductGroup(request.getName());
@@ -233,17 +206,10 @@ public class ProductService {
         //1. 해당 품목그룹 조회
         ProductGroup productGroup = productGroupRepository.findById(id).orElseThrow(()->new IllegalArgumentException("존재하지 않는 품목그룹입니다. id:" + request.getId()));
 
-        //2. 중복 체크하기
-        List<DuplicatedField> conflicts = new ArrayList<>();
-
-        //2-1. code 중복 체크
-        if(!productGroup.getName().equals(request.getName()) && productGroupRepository.existsByName(request.getName()))
-            conflicts.add(new DuplicatedField("name", request.getName()));
-
-        //2-3. 중복된 값이 하나라도 있으면 예외
-        if(!conflicts.isEmpty())
-            throw new DuplicateValueException(conflicts);
-
+        //2. 중복 체크하기 - 그룹명
+        DuplicationValidator.validate(dv -> dv
+                .check(!productGroup.getName().equals(request.getName()) && productGroupRepository.existsByName(request.getName()), "name", request.getName())
+        );
 
         //3. 업데이트
         productGroup.update(request.getName());

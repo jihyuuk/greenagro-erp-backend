@@ -1,6 +1,5 @@
 package erp.greenagro.greenagro_erp_backend.service;
 
-import erp.greenagro.greenagro_erp_backend.dto.exception.DuplicatedField;
 import erp.greenagro.greenagro_erp_backend.dto.warehouse.CreateWarehouseRequest;
 import erp.greenagro.greenagro_erp_backend.dto.warehouse.CreateWarehouseResponse;
 import erp.greenagro.greenagro_erp_backend.dto.warehouse.UpdateWarehouseRequest;
@@ -18,6 +17,7 @@ import erp.greenagro.greenagro_erp_backend.model.entity.WarehouseZone;
 import erp.greenagro.greenagro_erp_backend.repository.WarehouseRepository;
 import erp.greenagro.greenagro_erp_backend.repository.WarehouseSiteRepository;
 import erp.greenagro.greenagro_erp_backend.repository.WarehouseZoneRepository;
+import erp.greenagro.greenagro_erp_backend.validator.DuplicationValidator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -40,21 +40,11 @@ public class WarehouseService {
     @Transactional
     public CreateWarehouseSiteResponse createSite(CreateWarehouseSiteRequest request) {
 
-        //1. 중복 체크
-        List<DuplicatedField> conflicts = new ArrayList<>();
-
-        //1-1. code 중복 체크
-        if(warehouseSiteRepository.existsByCode(request.getCode()))
-            conflicts.add(new DuplicatedField("code", request.getCode()));
-
-        //1-2. name 중복 체크
-        if(warehouseSiteRepository.existsByName(request.getName()))
-            conflicts.add(new DuplicatedField("name", request.getName()));
-
-        //1-3. 중복된 값이 하나라도 있으면 예외
-        if(!conflicts.isEmpty())
-            throw new DuplicateValueException(conflicts);
-
+        //1. 중복 체크 - code, name
+        DuplicationValidator.validate(dv -> dv
+                .check(warehouseSiteRepository.existsByCode(request.getCode()), "code", request.getCode())
+                .check(warehouseSiteRepository.existsByName(request.getName()), "name", request.getName())
+        );
 
         //2. site 생성
         WarehouseSite warehouseSite = new WarehouseSite(
@@ -77,21 +67,11 @@ public class WarehouseService {
         //1. 찾기
         WarehouseSite warehouseSite = warehouseSiteRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("존재하지 않는 창고지점 입니다. id:" + id));
 
-        //2. 중복 체크하기
-        List<DuplicatedField> conflicts = new ArrayList<>();
-
-        //2-1. code 중복 체크
-        if (!request.getCode().equals(warehouseSite.getCode()) && warehouseSiteRepository.existsByCode(request.getCode()))
-            conflicts.add(new DuplicatedField("code", request.getCode()));
-
-        //2-2. name 중복 체크
-        if(!request.getName().equals(warehouseSite.getName()) && warehouseSiteRepository.existsByName(request.getName()))
-            conflicts.add(new DuplicatedField("name", request.getName()));
-
-        //2-3. 중복된 값이 하나라도 있으면 예외
-        if(!conflicts.isEmpty())
-            throw new DuplicateValueException(conflicts);
-
+        //2. 중복 체크 - code, name
+        DuplicationValidator.validate(dv -> dv
+                .check(!request.getCode().equals(warehouseSite.getCode()) && warehouseSiteRepository.existsByCode(request.getCode()), "code", request.getCode())
+                .check(!request.getName().equals(warehouseSite.getName()) && warehouseSiteRepository.existsByName(request.getName()), "name", request.getName())
+        );
 
         //3. 수정
         warehouseSite.update(
@@ -140,21 +120,11 @@ public class WarehouseService {
         //1.지점 찾기
         WarehouseSite warehouseSite = warehouseSiteRepository.findById(request.getWarehouseSiteId()).orElseThrow(() -> new IllegalArgumentException("존재하지 않는 창고 지점 입니다. id:" + request.getWarehouseSiteId()));
 
-        //2.중복 확인
-        List<DuplicatedField> conflicts = new ArrayList<>();
-
-        //2-1. code 중복 체크
-        if(warehouseRepository.existsByWarehouseSiteAndCode(warehouseSite, request.getCode()))
-            conflicts.add(new DuplicatedField("code", request.getCode()));
-
-        //2-2. name 중복 체크
-        if(warehouseRepository.existsByWarehouseSiteAndName(warehouseSite, request.getName()))
-            conflicts.add(new DuplicatedField("name", request.getName()));
-
-        //2-3. 중복된 값이 하나라도 있으면 예외
-        if(!conflicts.isEmpty())
-            throw new DuplicateValueException(conflicts);
-
+        //2.중복 체크 - code, name
+        DuplicationValidator.validate(dv -> dv
+                .check(warehouseRepository.existsByWarehouseSiteAndCode(warehouseSite, request.getCode()), "code", request.getCode())
+                .check(warehouseRepository.existsByWarehouseSiteAndName(warehouseSite, request.getName()), "name", request.getName())
+        );
 
         //3.생성
         Warehouse warehouse = new Warehouse(warehouseSite, request.getName(), request.getCode());
@@ -173,21 +143,11 @@ public class WarehouseService {
         //1. 기본 창고 찾기
         Warehouse warehouse = warehouseRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("존재하지 않는 창고입니다. id:" + id));
 
-        //2. 중복 체크
-        List<DuplicatedField> conflicts = new ArrayList<>();
-
-        //2-1. code 중복 체크
-        if(!warehouse.getCode().equals(request.getCode()) && warehouseRepository.existsByWarehouseSiteAndCode(warehouse.getWarehouseSite(), request.getCode()))
-            conflicts.add(new DuplicatedField("code", request.getCode()));
-
-        //2-2. name 중복 체크
-        if(!warehouse.getName().equals(request.getName()) && warehouseRepository.existsByWarehouseSiteAndName(warehouse.getWarehouseSite(), request.getName()))
-            conflicts.add(new DuplicatedField("name", request.getName()));
-
-        //2-3. 중복된 값이 하나라도 있으면 예외
-        if(!conflicts.isEmpty())
-            throw new DuplicateValueException(conflicts);
-
+        //2. 중복 체크 - code, name
+        DuplicationValidator.validate(dv -> dv
+                .check(!warehouse.getCode().equals(request.getCode()) && warehouseRepository.existsByWarehouseSiteAndCode(warehouse.getWarehouseSite(), request.getCode()), "code", request.getCode())
+                .check(!warehouse.getName().equals(request.getName()) && warehouseRepository.existsByWarehouseSiteAndName(warehouse.getWarehouseSite(), request.getName()), "name", request.getName())
+        );
 
         //3. 업데이트
         warehouse.update(request.getName(), request.getCode());
@@ -202,20 +162,11 @@ public class WarehouseService {
         //1.창고 찾기
         Warehouse warehouse = warehouseRepository.findById(request.getWarehouseId()).orElseThrow(() -> new IllegalArgumentException("존재하지 않는 창고 입니다. id:" + request.getWarehouseId()));
 
-        //2.중복 체크
-        List<DuplicatedField> conflicts = new ArrayList<>();
-
-        //2-1.code 중복 체크
-        if(warehouseZoneRepository.existsByWarehouseAndCode(warehouse, request.getCode()))
-            conflicts.add(new DuplicatedField("code", request.getCode()));
-
-        //2-2.name 중복 체크
-        if(warehouseZoneRepository.existsByWarehouseAndName(warehouse, request.getName()))
-            conflicts.add(new DuplicatedField("name", request.getName()));
-
-        //2-3. 중복된 값이 하나라도 있으면 예외
-        if(!conflicts.isEmpty())
-            throw new DuplicateValueException(conflicts);
+        //2.중복 체크 - code, name
+        DuplicationValidator.validate(dv -> dv
+                .check(warehouseZoneRepository.existsByWarehouseAndCode(warehouse, request.getCode()), "code", request.getCode())
+                .check(warehouseZoneRepository.existsByWarehouseAndName(warehouse, request.getName()), "name", request.getName())
+        );
 
 
         //3.생성
@@ -236,20 +187,11 @@ public class WarehouseService {
         //1. 창고 찾기
         WarehouseZone warehouseZone = warehouseZoneRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("존재하지 않는 구역입니다. id:" + id));
 
-        //2. 중복 체크
-        List<DuplicatedField> conflicts = new ArrayList<>();
-
-        //2-1. code 중복 체크
-        if(!warehouseZone.getCode().equals(request.getCode()) && warehouseZoneRepository.existsByWarehouseAndCode(warehouseZone.getWarehouse(), request.getCode()))
-            conflicts.add(new DuplicatedField("code", request.getCode()));
-
-        //2-2. name 중복 체크
-        if(!warehouseZone.getName().equals(request.getName()) && warehouseZoneRepository.existsByWarehouseAndName(warehouseZone.getWarehouse(), request.getName()))
-            conflicts.add(new DuplicatedField("name", request.getName()));
-
-        //2-3. 중복된 값이 하나라도 있으면 예외
-        if(!conflicts.isEmpty())
-            throw new DuplicateValueException(conflicts);
+        //2. 중복 체크하기 - 코드, 구역명
+        DuplicationValidator.validate(dv -> dv
+                .check(!warehouseZone.getCode().equals(request.getCode()) && warehouseZoneRepository.existsByWarehouseAndCode(warehouseZone.getWarehouse(), request.getCode()), "code", request.getCode())
+                .check(!warehouseZone.getName().equals(request.getName()) && warehouseZoneRepository.existsByWarehouseAndName(warehouseZone.getWarehouse(), request.getName()), "name", request.getName())
+        );
 
 
         //3. 업데이트

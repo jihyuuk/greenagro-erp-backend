@@ -2,9 +2,7 @@ package erp.greenagro.greenagro_erp_backend.service;
 
 import erp.greenagro.greenagro_erp_backend.dto.branch.BranchSummaryResponse;
 import erp.greenagro.greenagro_erp_backend.dto.employee.*;
-import erp.greenagro.greenagro_erp_backend.dto.exception.DuplicatedField;
 import erp.greenagro.greenagro_erp_backend.dto.payinfo.PayInfoDTO;
-import erp.greenagro.greenagro_erp_backend.exception.DuplicateValueException;
 import erp.greenagro.greenagro_erp_backend.helper.PasswordHelper;
 import erp.greenagro.greenagro_erp_backend.mapper.BranchMapper;
 import erp.greenagro.greenagro_erp_backend.mapper.EmployeeMapper;
@@ -17,6 +15,7 @@ import erp.greenagro.greenagro_erp_backend.model.enums.Role;
 import erp.greenagro.greenagro_erp_backend.repository.BranchRepository;
 import erp.greenagro.greenagro_erp_backend.repository.EmployeeRepository;
 import erp.greenagro.greenagro_erp_backend.util.RrnCryptoUtil;
+import erp.greenagro.greenagro_erp_backend.validator.DuplicationValidator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -40,15 +39,11 @@ public class EmployeeService {
     //직원 등록
     @Transactional
     public CreateEmployeeResponse createEmployee(CreateEmployeeRequest request) {
-        //중복 체크
-        List<DuplicatedField> conflicts = new ArrayList<>();
 
-        if (employeeRepository.existsByName(request.getName())) {
-            conflicts.add(new DuplicatedField("name", request.getName()));
-        }
-
-        if(!conflicts.isEmpty())
-            throw new DuplicateValueException(conflicts);
+        //중복 체크 - name
+        DuplicationValidator.validate(dv -> dv
+                .check(employeeRepository.existsByName(request.getName()), "name", request.getName())
+        );
 
         //지점 조회하기
         Branch branch = getBranchOrThrow(request.getBranchId());
