@@ -11,7 +11,6 @@ import java.net.URI;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
-    private final static String ERRORS = "errors";
 
     @ExceptionHandler(CustomException.class)
     public ResponseEntity<ProblemDetail> handleCustom(CustomException exception){
@@ -25,15 +24,9 @@ public class GlobalExceptionHandler {
         pd.setProperty("code", ec.getCode());
         pd.setProperty("timestamp", java.time.Instant.now());
 
-        //중복 예외
-        if(exception instanceof DuplicateValueException dve){
-            pd.setProperty(ERRORS, dve.getConflicts());
-        }
+        //데이터 존재시에 property에 추가
+        exception.getErrors().ifPresent(errors -> pd.setProperty("errors", errors));
 
-        //엔티티 존재 x
-        if(exception instanceof EntityNotFoundException enfe){
-            pd.setProperty(ERRORS, enfe.getErrors());
-        }
 
         return ResponseEntity.status(ec.getHttpStatus()).body(pd);
     }

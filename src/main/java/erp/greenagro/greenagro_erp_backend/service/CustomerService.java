@@ -1,10 +1,9 @@
 package erp.greenagro.greenagro_erp_backend.service;
 
 import erp.greenagro.greenagro_erp_backend.dto.customer.*;
-import erp.greenagro.greenagro_erp_backend.exception.EntityNotFoundException;
+import erp.greenagro.greenagro_erp_backend.exception.CustomException;
 import erp.greenagro.greenagro_erp_backend.mapper.CustomerMapper;
 import erp.greenagro.greenagro_erp_backend.model.entity.Customer;
-import erp.greenagro.greenagro_erp_backend.model.enums.ErrorCode;
 import erp.greenagro.greenagro_erp_backend.repository.CustomerRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -54,7 +53,7 @@ public class CustomerService {
     public CustomerDetailResponse getCustomerDetail(Long id) {
         //1. 해당 고객 조회 (없으면 에러)
         Customer customer = customerRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException(CUSTOMER_NOT_FOUND, id));
+                .orElseThrow(() -> new CustomException(CUSTOMER_NOT_FOUND, id));
 
         //2. dto 변환 및 반환 (주민번호의 경우 앞자리만 복호화)
         return customerMapper.toDetail(customer);
@@ -65,7 +64,7 @@ public class CustomerService {
     public CustomerEditResponse getCustomerEditData(Long id) {
         //1. 해당 고객 조회 (없으면 에러)
         Customer customer = customerRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException(CUSTOMER_NOT_FOUND, id));
+                .orElseThrow(() -> new CustomException(CUSTOMER_NOT_FOUND, id));
 
         //2. DTO 생성 반환
         return customerMapper.toEdit(customer);
@@ -76,7 +75,7 @@ public class CustomerService {
     public void updateCustomer(Long id, UpdateCustomerRequest request) {
         //1. 해당 고객 조회 (없으면 에러)
         Customer customer = customerRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException(CUSTOMER_NOT_FOUND, id));
+                .orElseThrow(() -> new CustomException(CUSTOMER_NOT_FOUND, id));
 
         //검증 추후 구현
 
@@ -109,7 +108,7 @@ public class CustomerService {
     public void deleteCustomer(Long id) {
         //1. 해당 고객 조회 (없으면 에러)
         Customer customer = customerRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException(CUSTOMER_NOT_FOUND, id));
+                .orElseThrow(() -> new CustomException(CUSTOMER_NOT_FOUND, id));
 
         //2. 논리 삭제
         customerRepository.delete(customer);

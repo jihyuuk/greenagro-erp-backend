@@ -1,7 +1,8 @@
 package erp.greenagro.greenagro_erp_backend.validator;
 
 import erp.greenagro.greenagro_erp_backend.dto.exception.DuplicatedField;
-import erp.greenagro.greenagro_erp_backend.exception.DuplicateValueException;
+import erp.greenagro.greenagro_erp_backend.exception.CustomException;
+import erp.greenagro.greenagro_erp_backend.model.enums.ErrorCode;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -39,7 +40,7 @@ public class DuplicationValidator {
     //유효성 검사를 마무리하고 예외를 던지는 메서드
     private void throwIfConflicts() {
         if (!conflicts.isEmpty()) {
-            throw new DuplicateValueException(this.conflicts);
+            throw new CustomException(ErrorCode.DUPLICATE_VALUE, this.conflicts);
         }
     }
 

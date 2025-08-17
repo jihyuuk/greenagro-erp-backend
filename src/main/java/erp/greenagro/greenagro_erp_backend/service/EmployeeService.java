@@ -3,7 +3,7 @@ package erp.greenagro.greenagro_erp_backend.service;
 import erp.greenagro.greenagro_erp_backend.dto.branch.BranchSummaryResponse;
 import erp.greenagro.greenagro_erp_backend.dto.employee.*;
 import erp.greenagro.greenagro_erp_backend.dto.payinfo.PayInfoDTO;
-import erp.greenagro.greenagro_erp_backend.exception.EntityNotFoundException;
+import erp.greenagro.greenagro_erp_backend.exception.CustomException;
 import erp.greenagro.greenagro_erp_backend.helper.PasswordHelper;
 import erp.greenagro.greenagro_erp_backend.mapper.BranchMapper;
 import erp.greenagro.greenagro_erp_backend.mapper.EmployeeMapper;
@@ -12,7 +12,6 @@ import erp.greenagro.greenagro_erp_backend.model.entity.Branch;
 import erp.greenagro.greenagro_erp_backend.model.entity.Employee;
 import erp.greenagro.greenagro_erp_backend.model.entity.PayInfo;
 import erp.greenagro.greenagro_erp_backend.model.enums.AccountStatus;
-import erp.greenagro.greenagro_erp_backend.model.enums.ErrorCode;
 import erp.greenagro.greenagro_erp_backend.model.enums.Role;
 import erp.greenagro.greenagro_erp_backend.repository.BranchRepository;
 import erp.greenagro.greenagro_erp_backend.repository.EmployeeRepository;
@@ -199,12 +198,12 @@ public class EmployeeService {
     //직원 조회 공용 메서드
     private Employee getEmployeeOrThrow(Long id){
         return employeeRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException(EMPLOYEE_NOT_FOUND, id));
+                .orElseThrow(() -> new CustomException(EMPLOYEE_NOT_FOUND, id));
     }
 
     //브랜치 조회 공용 메서드
     private Branch getBranchOrThrow(Long id) {
         return branchRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException(BRANCH_NOT_FOUND, id));
+                .orElseThrow(() -> new CustomException(BRANCH_NOT_FOUND, id));
     }
 }
