@@ -28,9 +28,10 @@ public class GlobalExceptionHandler {
         pd.setProperty("code", ec.getCode());
         pd.setProperty("timestamp", java.time.Instant.now());
 
-        if( exception instanceof DuplicateValueException dve){
-            pd.setProperty("conflicts", dve.getConflicts());
+        if(exception instanceof DuplicateValueException dve){
+            pd.setProperty("errors", dve.getConflicts());
         }
+
 
         return ResponseEntity.status(ec.getHttpStatus()).body(pd);
     }
