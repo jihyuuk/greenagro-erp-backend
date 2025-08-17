@@ -3,6 +3,7 @@ package erp.greenagro.greenagro_erp_backend.service;
 import erp.greenagro.greenagro_erp_backend.dto.auth.LoginRequest;
 import erp.greenagro.greenagro_erp_backend.dto.auth.TokenBundle;
 import erp.greenagro.greenagro_erp_backend.exception.CustomException;
+import erp.greenagro.greenagro_erp_backend.exception.EntityNotFoundException;
 import erp.greenagro.greenagro_erp_backend.helper.PasswordHelper;
 import erp.greenagro.greenagro_erp_backend.model.entity.Employee;
 import erp.greenagro.greenagro_erp_backend.model.enums.AccountStatus;
@@ -28,8 +29,7 @@ public class AuthService {
     //아이디 비번으로 로그인
     public TokenBundle login(LoginRequest request){
         //username 으로 직원 조회
-        Employee employee = employeeRepository.findByName(request.getUsername())
-                .orElseThrow(() -> new CustomException(INVALID_CREDENTIALS));
+        Employee employee = employeeRepository.findByName(request.getUsername()).orElseThrow(() -> new CustomException(INVALID_CREDENTIALS));
 
         //계정 상태 확인 (ACTIVE 만 로그인 가능)
         if(employee.getStatus() != AccountStatus.ACTIVE){
@@ -77,7 +77,7 @@ public class AuthService {
         }
 
         //4. 직원 DB 조회
-        Employee employee = employeeRepository.findById(employeeId).orElseThrow(() -> new IllegalArgumentException("존재하지 않는 직원입니다. id=" + employeeId));
+        Employee employee = employeeRepository.findById(employeeId).orElseThrow(() -> new EntityNotFoundException(EMPLOYEE_NOT_FOUND, employeeId));
 
         //4-1.계정 상태 확인 (ACTIVE 만 로그인 가능)
         if(employee.getStatus() != AccountStatus.ACTIVE){

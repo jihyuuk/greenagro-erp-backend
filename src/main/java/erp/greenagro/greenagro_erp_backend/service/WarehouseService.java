@@ -11,9 +11,11 @@ import erp.greenagro.greenagro_erp_backend.dto.warehousezone.CreateWarehouseZone
 import erp.greenagro.greenagro_erp_backend.dto.warehousezone.CreateWarehouseZoneResponse;
 import erp.greenagro.greenagro_erp_backend.dto.warehousezone.UpdateWarehouseZoneRequest;
 import erp.greenagro.greenagro_erp_backend.exception.DuplicateValueException;
+import erp.greenagro.greenagro_erp_backend.exception.EntityNotFoundException;
 import erp.greenagro.greenagro_erp_backend.model.entity.Warehouse;
 import erp.greenagro.greenagro_erp_backend.model.entity.WarehouseSite;
 import erp.greenagro.greenagro_erp_backend.model.entity.WarehouseZone;
+import erp.greenagro.greenagro_erp_backend.model.enums.ErrorCode;
 import erp.greenagro.greenagro_erp_backend.repository.WarehouseRepository;
 import erp.greenagro.greenagro_erp_backend.repository.WarehouseSiteRepository;
 import erp.greenagro.greenagro_erp_backend.repository.WarehouseZoneRepository;
@@ -25,6 +27,8 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+
+import static erp.greenagro.greenagro_erp_backend.model.enums.ErrorCode.*;
 
 
 @Service
@@ -65,7 +69,7 @@ public class WarehouseService {
     @Transactional
     public void updateSite(Long id, UpdateWarehouseSiteRequest request) {
         //1. 찾기
-        WarehouseSite warehouseSite = warehouseSiteRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("존재하지 않는 창고지점 입니다. id:" + id));
+        WarehouseSite warehouseSite = warehouseSiteRepository.findById(id).orElseThrow(() -> new EntityNotFoundException(WAREHOUSE_SITE_NOT_FOUND, id));
 
         //2. 중복 체크 - code, name
         DuplicationValidator.validate(dv -> dv
@@ -101,7 +105,7 @@ public class WarehouseService {
     @Transactional(readOnly = true)
     public WarehouseSiteResponse getSite(Long id) {
 
-        WarehouseSite warehouseSite = warehouseSiteRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("존재하지 않는 창고지점 입니다. id:" + id));
+        WarehouseSite warehouseSite = warehouseSiteRepository.findById(id).orElseThrow(() -> new EntityNotFoundException(WAREHOUSE_SITE_NOT_FOUND, id));
 
         return new WarehouseSiteResponse(
                 warehouseSite.getId(),
@@ -118,7 +122,7 @@ public class WarehouseService {
     public CreateWarehouseResponse createWarehouse(CreateWarehouseRequest request){
 
         //1.지점 찾기
-        WarehouseSite warehouseSite = warehouseSiteRepository.findById(request.getWarehouseSiteId()).orElseThrow(() -> new IllegalArgumentException("존재하지 않는 창고 지점 입니다. id:" + request.getWarehouseSiteId()));
+        WarehouseSite warehouseSite = warehouseSiteRepository.findById(request.getWarehouseSiteId()).orElseThrow(() -> new EntityNotFoundException(WAREHOUSE_SITE_NOT_FOUND, request.getWarehouseSiteId()));
 
         //2.중복 체크 - code, name
         DuplicationValidator.validate(dv -> dv
@@ -141,7 +145,7 @@ public class WarehouseService {
     @Transactional
     public void updateWarehouse(Long id, UpdateWarehouseRequest request){
         //1. 기본 창고 찾기
-        Warehouse warehouse = warehouseRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("존재하지 않는 창고입니다. id:" + id));
+        Warehouse warehouse = warehouseRepository.findById(id).orElseThrow(() -> new EntityNotFoundException(WAREHOUSE_NOT_FOUND, id));
 
         //2. 중복 체크 - code, name
         DuplicationValidator.validate(dv -> dv
@@ -160,7 +164,7 @@ public class WarehouseService {
     public CreateWarehouseZoneResponse createWarehouseZone(CreateWarehouseZoneRequest request){
 
         //1.창고 찾기
-        Warehouse warehouse = warehouseRepository.findById(request.getWarehouseId()).orElseThrow(() -> new IllegalArgumentException("존재하지 않는 창고 입니다. id:" + request.getWarehouseId()));
+        Warehouse warehouse = warehouseRepository.findById(request.getWarehouseId()).orElseThrow(() -> new EntityNotFoundException(WAREHOUSE_NOT_FOUND, request.getWarehouseId()));
 
         //2.중복 체크 - code, name
         DuplicationValidator.validate(dv -> dv
@@ -180,12 +184,12 @@ public class WarehouseService {
     }
 
 
-    //존 수정
+    //구역 수정
     @Transactional
     public void updateWarehouseZone(Long id, UpdateWarehouseZoneRequest request){
 
         //1. 창고 찾기
-        WarehouseZone warehouseZone = warehouseZoneRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("존재하지 않는 구역입니다. id:" + id));
+        WarehouseZone warehouseZone = warehouseZoneRepository.findById(id).orElseThrow(() -> new EntityNotFoundException(WAREHOUSE_ZONE_FOUND, id));
 
         //2. 중복 체크하기 - 코드, 구역명
         DuplicationValidator.validate(dv -> dv

@@ -5,9 +5,11 @@ import erp.greenagro.greenagro_erp_backend.dto.product.*;
 import erp.greenagro.greenagro_erp_backend.dto.productgroup.CreateProductGroupRequest;
 import erp.greenagro.greenagro_erp_backend.dto.productgroup.CreateProductGroupResponse;
 import erp.greenagro.greenagro_erp_backend.dto.productgroup.ProductGroupDTO;
+import erp.greenagro.greenagro_erp_backend.exception.EntityNotFoundException;
 import erp.greenagro.greenagro_erp_backend.model.entity.Customer;
 import erp.greenagro.greenagro_erp_backend.model.entity.Product;
 import erp.greenagro.greenagro_erp_backend.model.entity.ProductGroup;
+import erp.greenagro.greenagro_erp_backend.model.enums.ErrorCode;
 import erp.greenagro.greenagro_erp_backend.repository.CustomerRepository;
 import erp.greenagro.greenagro_erp_backend.repository.ProductGroupRepository;
 import erp.greenagro.greenagro_erp_backend.repository.ProductRepository;
@@ -17,6 +19,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+
+import static erp.greenagro.greenagro_erp_backend.model.enums.ErrorCode.*;
 
 @Service
 @RequiredArgsConstructor
@@ -41,12 +45,12 @@ public class ProductService {
         //2. 품목 그룹 조회
         ProductGroup productGroup = null;
         if(request.getProductGroupId() != null)
-            productGroup = productGroupRepository.findById(request.getProductGroupId()).orElseThrow(() -> new IllegalArgumentException("존재하지 않는 품목그룹입니다. id:" + request.getProductGroupId()));
+            productGroup = productGroupRepository.findById(request.getProductGroupId()).orElseThrow(() -> new EntityNotFoundException(PRODUCT_GROUP_NOT_FOUND, request.getProductGroupId()));
 
         //3. 회사 조회
         Customer customer = null;
         if(request.getCustomerId() != null)
-            customer = customerRepository.findById(request.getCustomerId()).orElseThrow(() -> new IllegalArgumentException("존재하지 않는 고객입니다. id:" + request.getCustomerId()));
+            customer = customerRepository.findById(request.getCustomerId()).orElseThrow(() -> new EntityNotFoundException(EMPLOYEE_NOT_FOUND, request.getCustomerId()));
 
         //4. 엔티티 생성
         Product product = new Product(
@@ -77,7 +81,7 @@ public class ProductService {
     public void updateProduct(Long id, UpdateProductRequest request){
 
         //1. 해당 품목 조회
-        Product product = productRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("존재하지 않는 품목입니다. id:" + id));
+        Product product = productRepository.findById(id).orElseThrow(() -> new EntityNotFoundException(PRODUCT_NOT_FOUND, id));
 
         //2. 중복 체크 - 품목코드, 품목명
         DuplicationValidator.validate(dv -> dv
@@ -88,12 +92,12 @@ public class ProductService {
         //3. 품목 그룹 조회
         ProductGroup productGroup = null;
         if(request.getProductGroupId() != null)
-            productGroup = productGroupRepository.findById(request.getProductGroupId()).orElseThrow(() -> new IllegalArgumentException("존재하지 않는 품목그룹입니다. id:" + request.getProductGroupId()));
+            productGroup = productGroupRepository.findById(request.getProductGroupId()).orElseThrow(() -> new EntityNotFoundException(PRODUCT_GROUP_NOT_FOUND, request.getProductGroupId()));
 
         //4. 회사 조회
         Customer customer = null;
         if(request.getCustomerId() != null)
-            customer = customerRepository.findById(request.getCustomerId()).orElseThrow(() -> new IllegalArgumentException("존재하지 않는 고객입니다. id:" + request.getCustomerId()));
+            customer = customerRepository.findById(request.getCustomerId()).orElseThrow(() -> new EntityNotFoundException(CUSTOMER_NOT_FOUND, request.getCustomerId()));
 
 
         //5. 수정하기
@@ -147,7 +151,8 @@ public class ProductService {
     @Transactional(readOnly = true)
     public ProductDetailResponse getProduct(Long id){
         //1. 해당 품목 조회
-        Product product = productRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("존재하지 않는 품목입니다. id:" + id));
+        Product product = productRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException(PRODUCT_NOT_FOUND, id));
 
         //2. dto 변환
         return new ProductDetailResponse(
@@ -172,7 +177,8 @@ public class ProductService {
     @Transactional
     public void deleteProduct(Long id){
         //1. 해당 품목 조회
-        Product product = productRepository.findById(id).orElseThrow(()-> new IllegalArgumentException("해당 품목을 찾을 수 없습니다. id:"+id));
+        Product product = productRepository.findById(id)
+                .orElseThrow(()-> new EntityNotFoundException(PRODUCT_NOT_FOUND, id));
 
         //2. 논리 삭제
         productRepository.delete(product);
@@ -204,7 +210,7 @@ public class ProductService {
     @Transactional
     public void updateGroup(Long id, ProductGroupDTO request){
         //1. 해당 품목그룹 조회
-        ProductGroup productGroup = productGroupRepository.findById(id).orElseThrow(()->new IllegalArgumentException("존재하지 않는 품목그룹입니다. id:" + request.getId()));
+        ProductGroup productGroup = productGroupRepository.findById(id).orElseThrow(() -> new EntityNotFoundException(PRODUCT_GROUP_NOT_FOUND, id));
 
         //2. 중복 체크하기 - 그룹명
         DuplicationValidator.validate(dv -> dv
@@ -236,7 +242,7 @@ public class ProductService {
     @Transactional
     public void deleteGroup(Long id){
         //1. 해당 품목그룹 조회
-        ProductGroup productGroup = productGroupRepository.findById(id).orElseThrow(()->new IllegalArgumentException("존재하지 않는 품목그룹입니다. id:" + id));
+        ProductGroup productGroup = productGroupRepository.findById(id).orElseThrow(() -> new EntityNotFoundException(PRODUCT_GROUP_NOT_FOUND, id));
 
         //2. 상품 있으면 삭제 불가 <- 나중에 자세히 리스트업 하기
         if(productRepository.existsByProductGroup(productGroup))
