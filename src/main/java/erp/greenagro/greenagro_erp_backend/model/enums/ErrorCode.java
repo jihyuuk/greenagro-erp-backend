@@ -29,6 +29,7 @@ public enum ErrorCode {
     // 409 Conflict
     DUPLICATE_VALUE(HttpStatus.CONFLICT, "C001", "중복된 데이터가 존재합니다."),
     RESOURCE_IN_USE(HttpStatus.CONFLICT, "C002", "연관된 데이터로 인해 삭제가 불가능합니다."),
+    PRODUCT_IN_USE(HttpStatus.CONFLICT, "C002", "연관된 품목으로 인해 삭제가 불가능합니다."),
 
     // 500 INTERNAL_SERVER_ERROR
     INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "S001", "서버 내부 오류가 발생했습니다."),

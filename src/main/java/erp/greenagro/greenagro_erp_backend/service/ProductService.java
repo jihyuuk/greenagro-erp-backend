@@ -1,11 +1,13 @@
 package erp.greenagro.greenagro_erp_backend.service;
 
 import erp.greenagro.greenagro_erp_backend.dto.customer.CustomerDTO;
+import erp.greenagro.greenagro_erp_backend.dto.exception.LookupDTO;
 import erp.greenagro.greenagro_erp_backend.dto.product.*;
 import erp.greenagro.greenagro_erp_backend.dto.productgroup.CreateProductGroupRequest;
 import erp.greenagro.greenagro_erp_backend.dto.productgroup.CreateProductGroupResponse;
 import erp.greenagro.greenagro_erp_backend.dto.productgroup.ProductGroupDTO;
 import erp.greenagro.greenagro_erp_backend.exception.EntityNotFoundException;
+import erp.greenagro.greenagro_erp_backend.exception.ResourceInUseException;
 import erp.greenagro.greenagro_erp_backend.model.entity.Customer;
 import erp.greenagro.greenagro_erp_backend.model.entity.Product;
 import erp.greenagro.greenagro_erp_backend.model.entity.ProductGroup;
@@ -244,10 +246,15 @@ public class ProductService {
         //1. 해당 품목그룹 조회
         ProductGroup productGroup = productGroupRepository.findById(id).orElseThrow(() -> new EntityNotFoundException(PRODUCT_GROUP_NOT_FOUND, id));
 
-        //2. 상품 있으면 삭제 불가 <- 나중에 자세히 리스트업 하기
-        if(productRepository.existsByProductGroup(productGroup))
-            //throw new ResourceInUseException(Map.of());
-            throw new IllegalArgumentException("해당 품목 그룹에 해당하는 품목이 있어서 삭제가 불가능합니다. ");
+        //2. 그룹에 속한 상품 있으면 삭제 불가
+        if(productRepository.existsByProductGroup(productGroup)){
+
+            List<LookupDTO> errors = productRepository.findAllByProductGroup(productGroup).stream().map(p ->
+                    new LookupDTO(p.getId(), p.getCode(), p.getName())
+            ).toList();
+
+            throw new ResourceInUseException(RESOURCE_IN_USE, errors);
+        }
 
         //3. 삭제
         productGroupRepository.delete(productGroup);
