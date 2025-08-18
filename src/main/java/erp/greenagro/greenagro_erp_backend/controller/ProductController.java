@@ -1,5 +1,6 @@
 package erp.greenagro.greenagro_erp_backend.controller;
 
+import erp.greenagro.greenagro_erp_backend.dto.product.*;
 import erp.greenagro.greenagro_erp_backend.dto.productgroup.CreateProductGroupRequest;
 import erp.greenagro.greenagro_erp_backend.dto.productgroup.CreateProductGroupResponse;
 import erp.greenagro.greenagro_erp_backend.dto.productgroup.ProductGroupDTO;
@@ -47,4 +48,44 @@ public class ProductController {
         return ResponseEntity.noContent().build();
     }
 
+
+
+    //품목 생성
+    @PostMapping("/products")
+    public ResponseEntity<CreateProductResponse> createProduct(@RequestBody CreateProductRequest request){
+        CreateProductResponse response = productService.createProduct(request);
+        return ResponseEntity.ok(response);
+    }
+
+
+    //품목수정
+    @PutMapping("/products/{id}")
+    public ResponseEntity<Void> updateProduct(@PathVariable Long id, @RequestBody UpdateProductRequest request){
+        productService.updateProduct(id, request);
+        return ResponseEntity.noContent().build();
+    }
+
+
+    //품목 전체 조회
+    @GetMapping("/products")
+    public ResponseEntity<List<ProductSummaryResponse>> getAllProducts(){
+        List<ProductSummaryResponse> response = productService.getAllProducts();
+        return ResponseEntity.ok(response);
+    }
+
+
+    //품목 상세 조회
+    @GetMapping("/products/{id}")
+    public ResponseEntity<ProductDetailResponse> getProduct(@PathVariable Long id){
+        ProductDetailResponse response = productService.getProduct(id);
+        return ResponseEntity.ok(response);
+    }
+
+
+    //품목 삭제
+    @DeleteMapping("/products/{id}")
+    public ResponseEntity<Void> deleteProduct(@PathVariable Long id){
+        productService.deleteProduct(id);
+        return ResponseEntity.noContent().build();
+    }
 }

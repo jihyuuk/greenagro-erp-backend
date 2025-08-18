@@ -2,11 +2,8 @@ package erp.greenagro.greenagro_erp_backend.dto.product;
 
 import erp.greenagro.greenagro_erp_backend.dto.customer.CustomerDTO;
 import erp.greenagro.greenagro_erp_backend.dto.productgroup.ProductGroupDTO;
-import erp.greenagro.greenagro_erp_backend.model.entity.Customer;
-import erp.greenagro.greenagro_erp_backend.model.entity.ProductGroup;
 import erp.greenagro.greenagro_erp_backend.model.enums.DistChannel;
 import erp.greenagro.greenagro_erp_backend.model.enums.TaxType;
-import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
