@@ -4,13 +4,11 @@ import erp.greenagro.greenagro_erp_backend.dto.product.*;
 import erp.greenagro.greenagro_erp_backend.dto.productgroup.CreateProductGroupRequest;
 import erp.greenagro.greenagro_erp_backend.dto.productgroup.CreateProductGroupResponse;
 import erp.greenagro.greenagro_erp_backend.dto.productgroup.ProductGroupDTO;
+import erp.greenagro.greenagro_erp_backend.exception.CustomException;
 import erp.greenagro.greenagro_erp_backend.model.entity.Customer;
 import erp.greenagro.greenagro_erp_backend.model.entity.Product;
 import erp.greenagro.greenagro_erp_backend.model.entity.ProductGroup;
-import erp.greenagro.greenagro_erp_backend.model.enums.CustomerType;
-import erp.greenagro.greenagro_erp_backend.model.enums.DistChannel;
-import erp.greenagro.greenagro_erp_backend.model.enums.SalesGroup;
-import erp.greenagro.greenagro_erp_backend.model.enums.TaxType;
+import erp.greenagro.greenagro_erp_backend.model.enums.*;
 import erp.greenagro.greenagro_erp_backend.repository.CustomerRepository;
 import erp.greenagro.greenagro_erp_backend.repository.ProductGroupRepository;
 import erp.greenagro.greenagro_erp_backend.repository.ProductRepository;
@@ -24,6 +22,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static erp.greenagro.greenagro_erp_backend.model.enums.ErrorCode.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
@@ -107,14 +106,19 @@ class ProductServiceTest {
         CreateProductRequest requestDuplicateName = getCreateProductRequest("P002","상품A", group, customer);
         CreateProductRequest requestDuplicateAll = getCreateProductRequest("P001","상품A", group, customer);
 
-
-        //when
         productService.createProduct(request);
 
+        //when
+        CustomException codeEx = assertThrows(CustomException.class, () -> productService.createProduct(requestDuplicateCode));
+        CustomException namEx = assertThrows(CustomException.class, () -> productService.createProduct(requestDuplicateName));
+        CustomException AllEx = assertThrows(CustomException.class, () -> productService.createProduct(requestDuplicateAll));
+
         //then
-        assertThrows(IllegalArgumentException.class, () -> productService.createProduct(requestDuplicateCode));
-        assertThrows(IllegalArgumentException.class, () -> productService.createProduct(requestDuplicateName));
-        assertThrows(IllegalArgumentException.class, () -> productService.createProduct(requestDuplicateAll));
+        assertEquals(DUPLICATE_VALUE, codeEx);
+        assertEquals(DUPLICATE_VALUE, namEx);
+        assertEquals(DUPLICATE_VALUE, AllEx);
+
+        //중복된값 필드에 들어갔나확인
     }
 
 
@@ -197,10 +201,16 @@ class ProductServiceTest {
         UpdateProductRequest requestDuplicateAll = getUpdateProductRequest("P001", "품목A", group, customer);
 
 
-        //when-then
-        assertThrows(IllegalArgumentException.class, () ->  productService.updateProduct(targetProduct.getId(), requestDuplicateCode));
-        assertThrows(IllegalArgumentException.class, () ->  productService.updateProduct(targetProduct.getId(), requestDuplicateName));
-        assertThrows(IllegalArgumentException.class, () ->  productService.updateProduct(targetProduct.getId(), requestDuplicateAll));
+        //when-
+        CustomException codeEx = assertThrows(CustomException.class, () -> productService.updateProduct(targetProduct.getId(), requestDuplicateCode));
+        CustomException nameEx = assertThrows(CustomException.class, () -> productService.updateProduct(targetProduct.getId(), requestDuplicateName));
+        CustomException allEx = assertThrows(CustomException.class, () -> productService.updateProduct(targetProduct.getId(), requestDuplicateAll));
+
+
+        //then
+        assertEquals(DUPLICATE_VALUE, codeEx);
+        assertEquals(DUPLICATE_VALUE, nameEx);
+        assertEquals(DUPLICATE_VALUE, allEx);
     }
 
 
@@ -346,11 +356,13 @@ class ProductServiceTest {
         CreateProductGroupRequest request = new CreateProductGroupRequest("농약");
         CreateProductGroupRequest requestDuplicateName = new CreateProductGroupRequest("농약");
 
+        productService.createGroup(request);
+
         //when
-        CreateProductGroupResponse response = productService.createGroup(request);
+        CustomException ex = assertThrows(CustomException.class, () -> productService.createGroup(requestDuplicateName));
 
         //then
-        assertThrows(IllegalArgumentException.class, () -> productService.createGroup(requestDuplicateName));
+        assertEquals(DUPLICATE_VALUE, ex.getErrorCode());
     }
 
 
@@ -418,10 +430,12 @@ class ProductServiceTest {
         ProductGroup group = productGroupRepository.save(new ProductGroup("농약"));
         Product product = productRepository.save(new Product("http://img/1", "123", "테스트 품목", "10L", 10L, group, null, null, null, null, null, null));
 
-        //when - then - 품목이 있어서 그룹 삭제 불가
-        assertThrows(IllegalArgumentException.class, () -> productService.deleteGroup(group.getId()));
+        //when - 그룹 삭제 시도
+        CustomException ex = assertThrows(CustomException.class, () -> productService.deleteGroup(group.getId()));
+        //then - 품목이 있어서 그룹 삭제 불가
+        assertEquals(PRODUCT_IN_USE, ex.getErrorCode());
 
-        //when - 품목 지우기
+        //when - 그룹에 속한 품목 지움
         productRepository.delete(product);
         //then - 그룹에 속한 품목이 없어서 삭제 가능!
         productService.deleteGroup(group.getId());

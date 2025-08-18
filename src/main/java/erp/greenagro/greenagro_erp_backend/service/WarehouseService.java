@@ -10,17 +10,22 @@ import erp.greenagro.greenagro_erp_backend.dto.warehousesite.WarehouseSiteRespon
 import erp.greenagro.greenagro_erp_backend.dto.warehousezone.CreateWarehouseZoneRequest;
 import erp.greenagro.greenagro_erp_backend.dto.warehousezone.CreateWarehouseZoneResponse;
 import erp.greenagro.greenagro_erp_backend.dto.warehousezone.UpdateWarehouseZoneRequest;
+import erp.greenagro.greenagro_erp_backend.exception.CustomException;
 import erp.greenagro.greenagro_erp_backend.model.entity.Warehouse;
 import erp.greenagro.greenagro_erp_backend.model.entity.WarehouseSite;
 import erp.greenagro.greenagro_erp_backend.model.entity.WarehouseZone;
 import erp.greenagro.greenagro_erp_backend.repository.WarehouseRepository;
 import erp.greenagro.greenagro_erp_backend.repository.WarehouseSiteRepository;
 import erp.greenagro.greenagro_erp_backend.repository.WarehouseZoneRepository;
+import erp.greenagro.greenagro_erp_backend.validator.DuplicationValidator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+
+import static erp.greenagro.greenagro_erp_backend.model.enums.ErrorCode.*;
+
 
 @Service
 @RequiredArgsConstructor
@@ -34,13 +39,12 @@ public class WarehouseService {
     //site 생성, 수정, 조회, 삭제 <- 나중에
     @Transactional
     public CreateWarehouseSiteResponse createSite(CreateWarehouseSiteRequest request) {
-        //1. 검증
-        //1-1. 이름 중복 검사
-        if (warehouseSiteRepository.existsByName(request.getName()))
-            throw new IllegalArgumentException("중복된 창고 지점명 입니다. 이름:" + request.getName());
-        //1-2. code 중복 검사
-        if (warehouseSiteRepository.existsByCode(request.getCode()))
-            throw new IllegalArgumentException("중복된 창고 지점 코드 입니다. 코드:" + request.getCode());
+
+        //1. 중복 체크 - code, name
+        DuplicationValidator.validate(dv -> dv
+                .check(warehouseSiteRepository.existsByCode(request.getCode()), "code", request.getCode())
+                .check(warehouseSiteRepository.existsByName(request.getName()), "name", request.getName())
+        );
 
         //2. site 생성
         WarehouseSite warehouseSite = new WarehouseSite(
@@ -61,15 +65,13 @@ public class WarehouseService {
     @Transactional
     public void updateSite(Long id, UpdateWarehouseSiteRequest request) {
         //1. 찾기
-        WarehouseSite warehouseSite = warehouseSiteRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("존재하지 않는 창고지점 입니다. id:" + id));
+        WarehouseSite warehouseSite = warehouseSiteRepository.findById(id).orElseThrow(() -> new CustomException(WAREHOUSE_SITE_NOT_FOUND, id));
 
-        //2. 검증
-        //2-1. 이름 중복 검사
-        if (!request.getName().equals(warehouseSite.getName()) && warehouseSiteRepository.existsByName(request.getName()))
-            throw new IllegalArgumentException("중복된 창고 지점명 입니다. 이름:" + request.getName());
-        //2-2. code 중복 검사
-        if (!request.getCode().equals(warehouseSite.getCode()) && warehouseSiteRepository.existsByCode(request.getCode()))
-            throw new IllegalArgumentException("중복된 창고 지점 코드 입니다. 코드:" + request.getCode());
+        //2. 중복 체크 - code, name
+        DuplicationValidator.validate(dv -> dv
+                .check(!request.getCode().equals(warehouseSite.getCode()) && warehouseSiteRepository.existsByCode(request.getCode()), "code", request.getCode())
+                .check(!request.getName().equals(warehouseSite.getName()) && warehouseSiteRepository.existsByName(request.getName()), "name", request.getName())
+        );
 
         //3. 수정
         warehouseSite.update(
@@ -99,7 +101,7 @@ public class WarehouseService {
     @Transactional(readOnly = true)
     public WarehouseSiteResponse getSite(Long id) {
 
-        WarehouseSite warehouseSite = warehouseSiteRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("존재하지 않는 창고지점 입니다. id:" + id));
+        WarehouseSite warehouseSite = warehouseSiteRepository.findById(id).orElseThrow(() -> new CustomException(WAREHOUSE_SITE_NOT_FOUND, id));
 
         return new WarehouseSiteResponse(
                 warehouseSite.getId(),
@@ -116,13 +118,13 @@ public class WarehouseService {
     public CreateWarehouseResponse createWarehouse(CreateWarehouseRequest request){
 
         //1.지점 찾기
-        WarehouseSite warehouseSite = warehouseSiteRepository.findById(request.getWarehouseSiteId()).orElseThrow(() -> new IllegalArgumentException("존재하지 않는 창고 지점 입니다. id:" + request.getWarehouseSiteId()));
+        WarehouseSite warehouseSite = warehouseSiteRepository.findById(request.getWarehouseSiteId()).orElseThrow(() -> new CustomException(WAREHOUSE_SITE_NOT_FOUND, request.getWarehouseSiteId()));
 
-        //2.검증
-        if(warehouseRepository.existsByWarehouseSiteAndName(warehouseSite, request.getName()))
-            throw new IllegalArgumentException("중복된 창고명 입니다. 이름:"+request.getName());
-        if(warehouseRepository.existsByWarehouseSiteAndCode(warehouseSite, request.getCode()))
-            throw new IllegalArgumentException("중복되는 창고 code 입니다. code:"+request.getCode());
+        //2.중복 체크 - code, name
+        DuplicationValidator.validate(dv -> dv
+                .check(warehouseRepository.existsByWarehouseSiteAndCode(warehouseSite, request.getCode()), "code", request.getCode())
+                .check(warehouseRepository.existsByWarehouseSiteAndName(warehouseSite, request.getName()), "name", request.getName())
+        );
 
         //3.생성
         Warehouse warehouse = new Warehouse(warehouseSite, request.getName(), request.getCode());
@@ -139,13 +141,13 @@ public class WarehouseService {
     @Transactional
     public void updateWarehouse(Long id, UpdateWarehouseRequest request){
         //1. 기본 창고 찾기
-        Warehouse warehouse = warehouseRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("존재하지 않는 창고입니다. id:" + id));
+        Warehouse warehouse = warehouseRepository.findById(id).orElseThrow(() -> new CustomException(WAREHOUSE_NOT_FOUND, id));
 
-        //2. 검증
-        if(!warehouse.getName().equals(request.getName()) && warehouseRepository.existsByWarehouseSiteAndName(warehouse.getWarehouseSite(), request.getName()))
-            throw new IllegalArgumentException("중복된 창고명 입니다. 이름:"+request.getName());
-        if(!warehouse.getCode().equals(request.getCode()) && warehouseRepository.existsByWarehouseSiteAndCode(warehouse.getWarehouseSite(), request.getCode()))
-            throw new IllegalArgumentException("중복되는 창고 code 입니다. code:"+request.getCode());
+        //2. 중복 체크 - code, name
+        DuplicationValidator.validate(dv -> dv
+                .check(!warehouse.getCode().equals(request.getCode()) && warehouseRepository.existsByWarehouseSiteAndCode(warehouse.getWarehouseSite(), request.getCode()), "code", request.getCode())
+                .check(!warehouse.getName().equals(request.getName()) && warehouseRepository.existsByWarehouseSiteAndName(warehouse.getWarehouseSite(), request.getName()), "name", request.getName())
+        );
 
         //3. 업데이트
         warehouse.update(request.getName(), request.getCode());
@@ -158,13 +160,14 @@ public class WarehouseService {
     public CreateWarehouseZoneResponse createWarehouseZone(CreateWarehouseZoneRequest request){
 
         //1.창고 찾기
-        Warehouse warehouse = warehouseRepository.findById(request.getWarehouseId()).orElseThrow(() -> new IllegalArgumentException("존재하지 않는 창고 입니다. id:" + request.getWarehouseId()));
+        Warehouse warehouse = warehouseRepository.findById(request.getWarehouseId()).orElseThrow(() -> new CustomException(WAREHOUSE_NOT_FOUND, request.getWarehouseId()));
 
-        //2.검증
-        if(warehouseZoneRepository.existsByWarehouseAndName(warehouse, request.getName()))
-            throw new IllegalArgumentException("중복된 구역명 입니다. 이름:"+request.getName());
-        if(warehouseZoneRepository.existsByWarehouseAndCode(warehouse, request.getCode()))
-            throw new IllegalArgumentException("중복되는 구역 code 입니다. code:"+request.getCode());
+        //2.중복 체크 - code, name
+        DuplicationValidator.validate(dv -> dv
+                .check(warehouseZoneRepository.existsByWarehouseAndCode(warehouse, request.getCode()), "code", request.getCode())
+                .check(warehouseZoneRepository.existsByWarehouseAndName(warehouse, request.getName()), "name", request.getName())
+        );
+
 
         //3.생성
         WarehouseZone warehouseZone = new WarehouseZone(warehouse, request.getName(), request.getCode());
@@ -177,18 +180,19 @@ public class WarehouseService {
     }
 
 
-    //존 수정
+    //구역 수정
     @Transactional
     public void updateWarehouseZone(Long id, UpdateWarehouseZoneRequest request){
 
         //1. 창고 찾기
-        WarehouseZone warehouseZone = warehouseZoneRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("존재하지 않는 구역입니다. id:" + id));
+        WarehouseZone warehouseZone = warehouseZoneRepository.findById(id).orElseThrow(() -> new CustomException(WAREHOUSE_ZONE_FOUND, id));
 
-        //2. 검증
-        if(!warehouseZone.getName().equals(request.getName()) && warehouseZoneRepository.existsByWarehouseAndName(warehouseZone.getWarehouse(), request.getName()))
-            throw new IllegalArgumentException("중복된 창고명 입니다. 이름:"+request.getName());
-        if(!warehouseZone.getCode().equals(request.getCode()) && warehouseZoneRepository.existsByWarehouseAndCode(warehouseZone.getWarehouse(), request.getCode()))
-            throw new IllegalArgumentException("중복되는 창고 code 입니다. code:"+request.getCode());
+        //2. 중복 체크하기 - 코드, 구역명
+        DuplicationValidator.validate(dv -> dv
+                .check(!warehouseZone.getCode().equals(request.getCode()) && warehouseZoneRepository.existsByWarehouseAndCode(warehouseZone.getWarehouse(), request.getCode()), "code", request.getCode())
+                .check(!warehouseZone.getName().equals(request.getName()) && warehouseZoneRepository.existsByWarehouseAndName(warehouseZone.getWarehouse(), request.getName()), "name", request.getName())
+        );
+
 
         //3. 업데이트
         warehouseZone.update(request.getName(), request.getCode());

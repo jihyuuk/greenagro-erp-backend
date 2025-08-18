@@ -5,6 +5,8 @@ import erp.greenagro.greenagro_erp_backend.model.entity.ProductGroup;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
+
 
 @Repository
 public interface ProductRepository extends JpaRepository<Product, Long> {
@@ -15,4 +17,5 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
 
     boolean existsByName(String name);
 
+    List<Product> findAllByProductGroup(ProductGroup productGroup);
 }

@@ -3,6 +3,7 @@ package erp.greenagro.greenagro_erp_backend.service;
 import erp.greenagro.greenagro_erp_backend.dto.branch.BranchSummaryResponse;
 import erp.greenagro.greenagro_erp_backend.dto.employee.*;
 import erp.greenagro.greenagro_erp_backend.dto.payinfo.PayInfoDTO;
+import erp.greenagro.greenagro_erp_backend.exception.CustomException;
 import erp.greenagro.greenagro_erp_backend.helper.PasswordHelper;
 import erp.greenagro.greenagro_erp_backend.mapper.BranchMapper;
 import erp.greenagro.greenagro_erp_backend.mapper.EmployeeMapper;
@@ -15,11 +16,14 @@ import erp.greenagro.greenagro_erp_backend.model.enums.Role;
 import erp.greenagro.greenagro_erp_backend.repository.BranchRepository;
 import erp.greenagro.greenagro_erp_backend.repository.EmployeeRepository;
 import erp.greenagro.greenagro_erp_backend.util.RrnCryptoUtil;
+import erp.greenagro.greenagro_erp_backend.validator.DuplicationValidator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
+
+import static erp.greenagro.greenagro_erp_backend.model.enums.ErrorCode.*;
 
 
 @Service
@@ -38,10 +42,11 @@ public class EmployeeService {
     //직원 등록
     @Transactional
     public CreateEmployeeResponse createEmployee(CreateEmployeeRequest request) {
-        //이름 중복여부 체크
-        if (employeeRepository.existsByName(request.getName())) {
-            throw new IllegalArgumentException("이미 존재하는 이름입니다.");
-        }
+
+        //중복 체크 - name
+        DuplicationValidator.validate(dv -> dv
+                .check(employeeRepository.existsByName(request.getName()), "name", request.getName())
+        );
 
         //지점 조회하기
         Branch branch = getBranchOrThrow(request.getBranchId());
@@ -193,12 +198,12 @@ public class EmployeeService {
     //직원 조회 공용 메서드
     private Employee getEmployeeOrThrow(Long id){
         return employeeRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 직원 입니다. id="+id));
+                .orElseThrow(() -> new CustomException(EMPLOYEE_NOT_FOUND, id));
     }
 
     //브랜치 조회 공용 메서드
     private Branch getBranchOrThrow(Long id) {
         return branchRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 지점 입니다. id="+id));
+                .orElseThrow(() -> new CustomException(BRANCH_NOT_FOUND, id));
     }
 }

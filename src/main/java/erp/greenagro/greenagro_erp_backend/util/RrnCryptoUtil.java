@@ -1,5 +1,7 @@
 package erp.greenagro.greenagro_erp_backend.util;
 
+import erp.greenagro.greenagro_erp_backend.exception.CustomException;
+import erp.greenagro.greenagro_erp_backend.model.enums.ErrorCode;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -7,6 +9,8 @@ import javax.crypto.Cipher;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 import java.util.Base64;
+
+import static erp.greenagro.greenagro_erp_backend.model.enums.ErrorCode.*;
 
 @Component
 public class RrnCryptoUtil {
@@ -29,7 +33,7 @@ public class RrnCryptoUtil {
             byte[] encrypted = cipher.doFinal(rrn.getBytes());
             return Base64.getEncoder().encodeToString(encrypted);
         } catch (Exception e) {
-            throw new RuntimeException("주민등록번호 암호화 실패", e);
+            throw new CustomException(INTERNAL_SERVER_ERROR);
         }
     }
 
@@ -46,7 +50,7 @@ public class RrnCryptoUtil {
             byte[] decrypted = cipher.doFinal(decoded);
             return new String(decrypted);
         } catch (Exception e) {
-            throw new RuntimeException("주민등록번호 복호화 실패", e);
+            throw new CustomException(INTERNAL_SERVER_ERROR);
         }
     }
 

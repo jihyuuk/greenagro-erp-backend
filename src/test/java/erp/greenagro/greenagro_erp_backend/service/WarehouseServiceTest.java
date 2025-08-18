@@ -1,5 +1,6 @@
 package erp.greenagro.greenagro_erp_backend.service;
 
+import erp.greenagro.greenagro_erp_backend.dto.exception.DuplicatedField;
 import erp.greenagro.greenagro_erp_backend.dto.warehouse.CreateWarehouseRequest;
 import erp.greenagro.greenagro_erp_backend.dto.warehouse.CreateWarehouseResponse;
 import erp.greenagro.greenagro_erp_backend.dto.warehousesite.CreateWarehouseSiteRequest;
@@ -8,9 +9,11 @@ import erp.greenagro.greenagro_erp_backend.dto.warehousesite.UpdateWarehouseSite
 import erp.greenagro.greenagro_erp_backend.dto.warehousesite.WarehouseSiteResponse;
 import erp.greenagro.greenagro_erp_backend.dto.warehousezone.CreateWarehouseZoneRequest;
 import erp.greenagro.greenagro_erp_backend.dto.warehousezone.CreateWarehouseZoneResponse;
+import erp.greenagro.greenagro_erp_backend.exception.CustomException;
 import erp.greenagro.greenagro_erp_backend.model.entity.Warehouse;
 import erp.greenagro.greenagro_erp_backend.model.entity.WarehouseSite;
 import erp.greenagro.greenagro_erp_backend.model.entity.WarehouseZone;
+import erp.greenagro.greenagro_erp_backend.model.enums.ErrorCode;
 import erp.greenagro.greenagro_erp_backend.repository.WarehouseRepository;
 import erp.greenagro.greenagro_erp_backend.repository.WarehouseSiteRepository;
 import erp.greenagro.greenagro_erp_backend.repository.WarehouseZoneRepository;
@@ -23,6 +26,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
+import static erp.greenagro.greenagro_erp_backend.model.enums.ErrorCode.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
@@ -81,10 +85,16 @@ class WarehouseServiceTest {
         CreateWarehouseSiteRequest requestDuplicateCode = new CreateWarehouseSiteRequest("인천지점", "경기도 김포시 하성면", "GMP");
         CreateWarehouseSiteRequest requestDuplicateAll = new CreateWarehouseSiteRequest("김포지점", "경기도 김포시 하성면", "GMP");
 
-        //when-then
-        assertThrows(IllegalArgumentException.class, ()->warehouseService.createSite(requestDuplicateName));
-        assertThrows(IllegalArgumentException.class, ()->warehouseService.createSite(requestDuplicateCode));
-        assertThrows(IllegalArgumentException.class, ()->warehouseService.createSite(requestDuplicateAll));
+        //when
+        CustomException nameEx = assertThrows(CustomException.class, () -> warehouseService.createSite(requestDuplicateName));
+        CustomException codeEx = assertThrows(CustomException.class, () -> warehouseService.createSite(requestDuplicateCode));
+        CustomException allEx = assertThrows(CustomException.class, () -> warehouseService.createSite(requestDuplicateAll));
+
+
+        //then
+        assertEquals(DUPLICATE_VALUE, nameEx.getErrorCode());
+        assertEquals(DUPLICATE_VALUE, codeEx.getErrorCode());
+        assertEquals(DUPLICATE_VALUE, allEx.getErrorCode());
     }
 
 
@@ -114,10 +124,15 @@ class WarehouseServiceTest {
         UpdateWarehouseSiteRequest requestDuplicateCode = new UpdateWarehouseSiteRequest("일산지점", "", "GMP");
         UpdateWarehouseSiteRequest requestDuplicateAll = new UpdateWarehouseSiteRequest("김포지점", "", "GMP");
 
-        //when-then
-        assertThrows(IllegalArgumentException.class, () -> warehouseService.updateSite(site.getId(), requestDuplicateName));
-        assertThrows(IllegalArgumentException.class, () -> warehouseService.updateSite(site.getId(), requestDuplicateCode));
-        assertThrows(IllegalArgumentException.class, () -> warehouseService.updateSite(site.getId(), requestDuplicateAll));
+        //when
+        CustomException nameEx = assertThrows(CustomException.class, () -> warehouseService.updateSite(site.getId(), requestDuplicateName));
+        CustomException codeEx = assertThrows(CustomException.class, () -> warehouseService.updateSite(site.getId(), requestDuplicateCode));
+        CustomException allEx = assertThrows(CustomException.class, () -> warehouseService.updateSite(site.getId(), requestDuplicateAll));
+
+        //then
+        assertEquals(DUPLICATE_VALUE, nameEx.getErrorCode());
+        assertEquals(DUPLICATE_VALUE, codeEx.getErrorCode());
+        assertEquals(DUPLICATE_VALUE, allEx.getErrorCode());
     }
 
 
@@ -188,15 +203,21 @@ class WarehouseServiceTest {
         CreateWarehouseRequest request = new CreateWarehouseRequest(siteId1, "1번창고", "01");
         CreateWarehouseRequest requestDuplicateName = new CreateWarehouseRequest(siteId1, "1번창고", "02");
         CreateWarehouseRequest requestDuplicateCode = new CreateWarehouseRequest(siteId1, "2번창고", "01");
+        CreateWarehouseRequest requestDuplicateAll = new CreateWarehouseRequest(siteId1, "1번창고", "01");
         CreateWarehouseRequest otherSiteDuplicateAll = new CreateWarehouseRequest(siteId2, "1번창고", "01");
 
-        //when
         warehouseService.createWarehouse(request);
 
+        //when
+        CustomException nameEx = assertThrows(CustomException.class, () -> warehouseService.createWarehouse(requestDuplicateName));
+        CustomException codeEx = assertThrows(CustomException.class, () -> warehouseService.createWarehouse(requestDuplicateCode));
+        CustomException allEx = assertThrows(CustomException.class, () -> warehouseService.createWarehouse(requestDuplicateAll));
+
         //then
-        assertThrows(IllegalArgumentException.class, () -> warehouseService.createWarehouse(requestDuplicateName));
-        assertThrows(IllegalArgumentException.class, () -> warehouseService.createWarehouse(requestDuplicateCode));
         warehouseService.createWarehouse(otherSiteDuplicateAll); // 다른 지점의 창고와의 중복은 상관없음
+        assertEquals(DUPLICATE_VALUE, nameEx.getErrorCode());
+        assertEquals(DUPLICATE_VALUE, codeEx.getErrorCode());
+        assertEquals(DUPLICATE_VALUE, allEx.getErrorCode());
     }
 
 
@@ -228,15 +249,21 @@ class WarehouseServiceTest {
         CreateWarehouseZoneRequest request = new CreateWarehouseZoneRequest(warehouseId1, "1번창고", "01");
         CreateWarehouseZoneRequest requestDuplicateName = new CreateWarehouseZoneRequest(warehouseId1, "1번창고", "02");
         CreateWarehouseZoneRequest requestDuplicateCode = new CreateWarehouseZoneRequest(warehouseId1, "2번창고", "01");
+        CreateWarehouseZoneRequest requestDuplicateAll = new CreateWarehouseZoneRequest(warehouseId1, "1번창고", "01");
         CreateWarehouseZoneRequest otherWarehouseDuplicateAll = new CreateWarehouseZoneRequest(warehouseId2, "1번창고", "01");
 
-        //when
         warehouseService.createWarehouseZone(request);
 
+        //when
+        CustomException nameEx = assertThrows(CustomException.class, () -> warehouseService.createWarehouseZone(requestDuplicateName));
+        CustomException codeEx = assertThrows(CustomException.class, () -> warehouseService.createWarehouseZone(requestDuplicateCode));
+        CustomException allEx = assertThrows(CustomException.class, () -> warehouseService.createWarehouseZone(requestDuplicateAll));
+
         //then
-        assertThrows(IllegalArgumentException.class, () -> warehouseService.createWarehouseZone(requestDuplicateName));
-        assertThrows(IllegalArgumentException.class, () -> warehouseService.createWarehouseZone(requestDuplicateCode));
         warehouseService.createWarehouseZone(otherWarehouseDuplicateAll); // 다른 지점의 창고와의 중복은 상관없음
+        assertEquals(DUPLICATE_VALUE, nameEx.getErrorCode());
+        assertEquals(DUPLICATE_VALUE, codeEx.getErrorCode());
+        assertEquals(DUPLICATE_VALUE, allEx.getErrorCode());
     }
 
 
