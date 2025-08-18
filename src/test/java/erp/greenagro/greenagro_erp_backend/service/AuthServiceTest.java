@@ -2,6 +2,7 @@ package erp.greenagro.greenagro_erp_backend.service;
 
 import erp.greenagro.greenagro_erp_backend.dto.auth.LoginRequest;
 import erp.greenagro.greenagro_erp_backend.dto.auth.TokenBundle;
+import erp.greenagro.greenagro_erp_backend.exception.CustomException;
 import erp.greenagro.greenagro_erp_backend.model.entity.Employee;
 import erp.greenagro.greenagro_erp_backend.model.enums.AccountStatus;
 import erp.greenagro.greenagro_erp_backend.model.enums.Role;
@@ -14,9 +15,9 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
-import java.util.Date;
 import java.util.UUID;
 
+import static erp.greenagro.greenagro_erp_backend.model.enums.ErrorCode.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
@@ -62,9 +63,13 @@ class AuthServiceTest {
         LoginRequest userNameRequest = new LoginRequest("김길동", "1234");
         LoginRequest passwordRequest = new LoginRequest("홍길동", "12345");
 
-        //when-then
-        assertThrows(IllegalArgumentException.class, () -> authService.login(userNameRequest)); //나중에 커스텀 예외 적용
-        assertThrows(IllegalArgumentException.class, () -> authService.login(passwordRequest)); //나중에 커스텀 예외 적용
+        //when
+        CustomException nameEx = assertThrows(CustomException.class, () -> authService.login(userNameRequest));
+        CustomException pwdEx = assertThrows(CustomException.class, () -> authService.login(passwordRequest));
+
+        //then
+        assertEquals(INVALID_CREDENTIALS, nameEx.getErrorCode());
+        assertEquals(INVALID_CREDENTIALS, pwdEx.getErrorCode());
     }
 
 
@@ -74,8 +79,11 @@ class AuthServiceTest {
         Employee employee = getMockEmployee("홍길동", "1234", Role.MANAGER, AccountStatus.ON_LEAVE);
         LoginRequest loginRequest = new LoginRequest("홍길동", "1234");
 
-        //when-then
-        assertThrows(IllegalArgumentException.class, () -> authService.login(loginRequest)); //나중에 커스텀 예외 적용
+        //when
+        CustomException ex = assertThrows(CustomException.class, () -> authService.login(loginRequest));
+
+        //then
+        assertEquals(INVALID_CREDENTIALS, ex.getErrorCode());
     }
 
 
@@ -121,7 +129,8 @@ class AuthServiceTest {
         updateMockEmployee(employee, employee.getName(), employee.getRole(), AccountStatus.RESIGNED);
 
         //then
-        assertThrows(IllegalArgumentException.class, () -> authService.refresh(refreshToken));
+        CustomException ex = assertThrows(CustomException.class, () -> authService.refresh(refreshToken));
+        assertEquals(TOKEN_REFRESH_FAILED, ex.getErrorCode());
     }
 
 
@@ -168,9 +177,14 @@ class AuthServiceTest {
         //토큰 갱신
         String secondRefreshToken = authService.refresh(firstRefreshToken).getRefreshToken();
 
-        //when-then - 이전 토큰으로 갱신 요청시 위험감지
-        assertThrows(IllegalArgumentException.class, () -> authService.refresh(firstRefreshToken));
-        assertTrue(refreshTokenRedisService.get(employee.getId(), deviceId).isEmpty());
+
+        //when - 이전 토큰으로 갱신 요청시 위험감지
+        CustomException ex = assertThrows(CustomException.class, () -> authService.refresh(firstRefreshToken));
+
+
+        //then
+        assertEquals(TOKEN_REFRESH_FAILED, ex.getErrorCode());
+        assertTrue(refreshTokenRedisService.get(employee.getId(), deviceId).isEmpty()); //Redis에서 리프레시 토큰 삭제
     }
 
 
