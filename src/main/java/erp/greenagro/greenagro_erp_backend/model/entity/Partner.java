@@ -6,36 +6,32 @@ import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.hibernate.annotations.SoftDelete;
 
-@Getter
 @Entity
+@Getter
+@Setter(AccessLevel.PROTECTED)
 @SoftDelete
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class Partner {
+@Inheritance(strategy = InheritanceType.SINGLE_TABLE)
+@DiscriminatorColumn(name = "partner_type", discriminatorType = DiscriminatorType.STRING)
+public abstract class Partner {
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Enumerated(EnumType.STRING)
-    private PartnerType partnerType; //사업자 유형 (법인사업자, 개인사업자, 개인)
+//    @Enumerated(EnumType.STRING)
+//    private PartnerType partnerType; //사업자 유형 (법인사업자, 개인사업자, 개인)
 
     @Enumerated(EnumType.STRING)
-    private SalesGroup salesGroup;    //영업 분류 (조경, 농협, 관공서, 개인, 기타)
+    private SalesGroup salesGroup;   //영업 분류 (조경, 농협, 관공서, 개인, 기타)
 
-    private String corpNo;      //법인번호 (법인사업자만)
+    private String code;        //거래처 코드
 
-    private String bizNo;       //사업자번호 (개인 X)
+    private String partnerName; //거래처명
 
-    private String rrn;         //주민번호 (개인만)
-
-    private String bizName;     //상호 (개인 X)
-
-    private String ceoName;     //대표자명
-
-    private String bizType;     //업태 (개인 X)
-
-    private String bizItem;     //종목 (개인 X)
+    private String repName;     //대표자
 
     private String tel;         //전화
 
@@ -56,16 +52,11 @@ public class Partner {
     private String memo;        //비고
 
 
-    public Partner(PartnerType partnerType, SalesGroup salesGroup, String corpNo, String bizNo, String rrn, String bizName, String ceoName, String bizType, String bizItem, String tel, String phone, String addressMain, String addressSub, String fax, String email, String ourManager, String partnerManager, String memo) {
-        this.partnerType = partnerType;
+    public Partner(SalesGroup salesGroup, String code, String partnerName, String repName, String tel, String phone, String addressMain, String addressSub, String fax, String email, String ourManager, String partnerManager, String memo) {
         this.salesGroup = salesGroup;
-        this.corpNo = corpNo;
-        this.bizNo = bizNo;
-        this.rrn = rrn;
-        this.bizName = bizName;
-        this.ceoName = ceoName;
-        this.bizType = bizType;
-        this.bizItem = bizItem;
+        this.code = code;
+        this.partnerName = partnerName;
+        this.repName = repName;
         this.tel = tel;
         this.phone = phone;
         this.addressMain = addressMain;
@@ -76,28 +67,4 @@ public class Partner {
         this.partnerManager = partnerManager;
         this.memo = memo;
     }
-
-
-    //업데이트
-    public void update(PartnerType partnerType, SalesGroup salesGroup, String corpNo, String bizNo, String rrn, String bizName, String ceoName, String bizType, String bizItem, String tel, String phone, String addressMain, String addressSub, String fax, String email, String ourManager, String partnerManager, String memo) {
-        this.partnerType = partnerType;
-        this.salesGroup = salesGroup;
-        this.corpNo = corpNo;
-        this.bizNo = bizNo;
-        this.rrn = rrn;
-        this.bizName = bizName;
-        this.ceoName = ceoName;
-        this.bizType = bizType;
-        this.bizItem = bizItem;
-        this.tel = tel;
-        this.phone = phone;
-        this.addressMain = addressMain;
-        this.addressSub = addressSub;
-        this.fax = fax;
-        this.email = email;
-        this.ourManager = ourManager;
-        this.partnerManager = partnerManager;
-        this.memo = memo;
-    }
-
 }
