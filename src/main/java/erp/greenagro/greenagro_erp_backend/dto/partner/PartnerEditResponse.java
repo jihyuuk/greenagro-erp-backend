@@ -1,5 +1,6 @@
 package erp.greenagro.greenagro_erp_backend.dto.partner;
 
+import erp.greenagro.greenagro_erp_backend.dto.partner.detail.PartnerDetailBase;
 import erp.greenagro.greenagro_erp_backend.model.enums.PartnerType;
 import erp.greenagro.greenagro_erp_backend.model.enums.SalesGroup;
 import lombok.AllArgsConstructor;
@@ -11,7 +12,7 @@ import java.util.List;
 @AllArgsConstructor
 public class PartnerEditResponse {
 
-    private PartnerDetailResponse partner; //거래처 상세 정보
+    private PartnerDetailBase partner; //거래처 상세 정보
 
     private List<PartnerType> partnerTypeOptions; //사업자 유형 Enum (법인사업자, 개인사업자, 개인)
 

@@ -1,10 +1,23 @@
 package erp.greenagro.greenagro_erp_backend.service;
 
-import erp.greenagro.greenagro_erp_backend.dto.partner.*;
+import erp.greenagro.greenagro_erp_backend.dto.partner.PartnerEditResponse;
+import erp.greenagro.greenagro_erp_backend.dto.partner.PartnerSummaryResponse;
+import erp.greenagro.greenagro_erp_backend.dto.partner.create.CreateBizPartnerRequest;
+import erp.greenagro.greenagro_erp_backend.dto.partner.create.CreateIndPartnerRequest;
+import erp.greenagro.greenagro_erp_backend.dto.partner.create.CreatePartnerResponse;
+import erp.greenagro.greenagro_erp_backend.dto.partner.detail.PartnerDetailBase;
+import erp.greenagro.greenagro_erp_backend.dto.partner.update.UpdateBizPartnerRequest;
+import erp.greenagro.greenagro_erp_backend.dto.partner.update.UpdateIndPartnerRequest;
 import erp.greenagro.greenagro_erp_backend.exception.CustomException;
 import erp.greenagro.greenagro_erp_backend.mapper.PartnerMapper;
+import erp.greenagro.greenagro_erp_backend.model.entity.BusinessPartner;
+import erp.greenagro.greenagro_erp_backend.model.entity.IndividualPartner;
 import erp.greenagro.greenagro_erp_backend.model.entity.Partner;
+import erp.greenagro.greenagro_erp_backend.repository.BusinessPartnerRepository;
+import erp.greenagro.greenagro_erp_backend.repository.IndividualPartnerRepository;
 import erp.greenagro.greenagro_erp_backend.repository.PartnerRepository;
+import erp.greenagro.greenagro_erp_backend.util.RrnCryptoUtil;
+import erp.greenagro.greenagro_erp_backend.validator.DuplicationValidator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -18,23 +31,87 @@ import static erp.greenagro.greenagro_erp_backend.model.enums.ErrorCode.*;
 public class PartnerService {
 
     private final PartnerRepository partnerRepository;
+    private final IndividualPartnerRepository indPartnerRepo;
+    private final BusinessPartnerRepository bizPartnerRepo;
     private final PartnerMapper partnerMapper;
+    private final RrnCryptoUtil rrnCryptoUtil;
 
-    //거래처 생성
+
+    //거래처 생성(사업자)
     @Transactional
-    public CreatePartnerResponse createPartner(CreatePartnerRequest request) {
+    public CreatePartnerResponse createBizPartner(CreateBizPartnerRequest request) {
         //1. 각종 검증
 
-        //2. 중복확인 - 중복에 관해서는 열어두자! 추후 고려
+        //2. 중복확인 - 거래처명, 사업자번호, 주민번호 <- 중복허용
+        DuplicationValidator.validate(dv -> dv
+                //코드 중복 확인
+                .check(partnerRepository.existsByCode(request.getCode()),"code", request.getCode())
+        );
+
 
         //3. 객체 생성 (주민번호의 경우 암호화 필요)
-        Partner partner = partnerMapper.fromCreate(request);
+        BusinessPartner bizPartner = new BusinessPartner(
+                request.getSalesGroup(),
+                request.getCode(),
+                request.getPartnerName(),
+                request.getRepName(),
+                request.getTel(),
+                request.getPhone(),
+                request.getAddressMain(),
+                request.getAddressSub(),
+                request.getFax(),
+                request.getEmail(),
+                request.getOurManager(),
+                request.getPartnerManager(),
+                request.getMemo(),
+                request.getBizNo(),
+                request.getBizType(),
+                request.getBizItem()
+        );
 
         //3. 저장
-        partnerRepository.save(partner);
+        BusinessPartner savedBizPartner = bizPartnerRepo.save(bizPartner);
 
         //4. id 반환
-        return partnerMapper.toCreate(partner);
+        return partnerMapper.toCreate(savedBizPartner);
+    }
+
+
+    //거래처 생성(개인)
+    @Transactional
+    public CreatePartnerResponse createIndPartner(CreateIndPartnerRequest request) {
+        //1. 각종 검증
+
+        //2. 중복확인 - 거래처명, 사업자번호, 주민번호 <- 중복허용
+        DuplicationValidator.validate(dv -> dv
+                //코드 중복 확인
+                .check(partnerRepository.existsByCode(request.getCode()),"code", request.getCode())
+        );
+
+
+        //3. 객체 생성 (주민번호의 경우 암호화 필요)
+        IndividualPartner indPartner = new IndividualPartner(
+                request.getSalesGroup(),
+                request.getCode(),
+                request.getPartnerName(),
+                request.getRepName(),
+                request.getTel(),
+                request.getPhone(),
+                request.getAddressMain(),
+                request.getAddressSub(),
+                request.getFax(),
+                request.getEmail(),
+                request.getOurManager(),
+                request.getPartnerManager(),
+                request.getMemo(),
+                rrnCryptoUtil.encryptRrn(request.getRrn()) //주민번호 암호화
+        );
+
+        //3. 저장
+        IndividualPartner savedIndPartner = indPartnerRepo.save(indPartner);
+
+        //4. id 반환
+        return new CreatePartnerResponse(savedIndPartner.getId());
     }
 
 
@@ -50,46 +127,44 @@ public class PartnerService {
 
     //상세 조회
     @Transactional(readOnly = true)
-    public PartnerDetailResponse getPartnerDetail(Long id) {
+    public PartnerDetailBase getPartnerDetail(Long id) {
         //1. 해당 거래처 조회 (없으면 에러)
-        Partner partner = partnerRepository.findById(id)
-                .orElseThrow(() -> new CustomException(PARTNER_NOT_FOUND, id));
+        Partner partner = partnerRepository.findById(id).orElseThrow(() -> new CustomException(PARTNER_NOT_FOUND, id));
 
-        //2. dto 변환 및 반환 (주민번호의 경우 앞자리만 복호화)
+        //2. dto 변환 및 반환
         return partnerMapper.toDetail(partner);
     }
+
 
     //수정 데이터 조회
     @Transactional(readOnly = true)
     public PartnerEditResponse getPartnerEditData(Long id) {
         //1. 해당 거래처 조회 (없으면 에러)
-        Partner partner = partnerRepository.findById(id)
-                .orElseThrow(() -> new CustomException(PARTNER_NOT_FOUND, id));
+        Partner partner = partnerRepository.findById(id).orElseThrow(() -> new CustomException(PARTNER_NOT_FOUND, id));
 
         //2. DTO 생성 반환
         return partnerMapper.toEdit(partner);
     }
 
-    //수정
+
+    //수정 - 사업자
     @Transactional
-    public void updatePartner(Long id, UpdatePartnerRequest request) {
+    public void updateBizPartner(Long id, UpdateBizPartnerRequest request) {
         //1. 해당 거래처 조회 (없으면 에러)
-        Partner partner = partnerRepository.findById(id)
-                .orElseThrow(() -> new CustomException(PARTNER_NOT_FOUND, id));
+        BusinessPartner partner = bizPartnerRepo.findById(id).orElseThrow(() -> new CustomException(PARTNER_NOT_FOUND, id));
 
-        //검증 추후 구현
+        //2. 중복 검사
+        DuplicationValidator.validate(dv -> dv
+                //코드 중복 체크
+                .check(!partner.getCode().equals(request.getCode()) && partnerRepository.existsByCode(request.getCode()), "code", request.getCode())
+        );
 
-        //2. 업데이트
+        //3. 업데이트
         partner.update(
-                request.getPartnerType(),
                 request.getSalesGroup(),
-                request.getCorpNo(),
-                request.getBizNo(),
-                request.getRrn(),
-                request.getBizName(),
-                request.getCeoName(),
-                request.getBizType(),
-                request.getBizItem(),
+                request.getCode(),
+                request.getPartnerName(),
+                request.getRepName(),
                 request.getTel(),
                 request.getPhone(),
                 request.getAddressMain(),
@@ -98,7 +173,43 @@ public class PartnerService {
                 request.getEmail(),
                 request.getOurManager(),
                 request.getPartnerManager(),
-                request.getMemo()
+                request.getMemo(),
+                request.getBizNo(),
+                request.getBizType(),
+                request.getBizItem()
+        );
+
+    }
+
+
+    //수정 - 개인
+    @Transactional
+    public void updateIndPartner(Long id, UpdateIndPartnerRequest request) {
+        //1. 해당 거래처 조회 (없으면 에러)
+        IndividualPartner partner = indPartnerRepo.findById(id).orElseThrow(() -> new CustomException(PARTNER_NOT_FOUND, id));
+
+        //2. 중복 검사
+        DuplicationValidator.validate(dv -> dv
+                //코드 중복 체크
+                .check(!partner.getCode().equals(request.getCode()) && partnerRepository.existsByCode(request.getCode()), "code", request.getCode())
+        );
+
+        //3. 업데이트
+        partner.update(
+                request.getSalesGroup(),
+                request.getCode(),
+                request.getPartnerName(),
+                request.getRepName(),
+                request.getTel(),
+                request.getPhone(),
+                request.getAddressMain(),
+                request.getAddressSub(),
+                request.getFax(),
+                request.getEmail(),
+                request.getOurManager(),
+                request.getPartnerManager(),
+                request.getMemo(),
+                rrnCryptoUtil.encryptRrn(request.getRrn()) // 주민번호 암호화
         );
     }
 

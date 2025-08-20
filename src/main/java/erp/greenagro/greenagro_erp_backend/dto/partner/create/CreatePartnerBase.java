@@ -1,29 +1,36 @@
-package erp.greenagro.greenagro_erp_backend.dto.partner;
+package erp.greenagro.greenagro_erp_backend.dto.partner.create;
 
 import erp.greenagro.greenagro_erp_backend.model.enums.PartnerType;
 import erp.greenagro.greenagro_erp_backend.model.enums.SalesGroup;
-import lombok.AllArgsConstructor;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 
 @Getter
-@AllArgsConstructor
-public class PartnerSummaryResponse {
+public abstract class CreatePartnerBase {
 
-    private Long id;
-
+    @NotBlank
     private String code;        //거래처 코드
 
+    @NotNull
     private PartnerType partnerType; //사업자 유형 (법인사업자, 개인사업자, 개인)
 
+    @NotNull
     private SalesGroup salesGroup;   //영업 분류 (조경, 농협, 관공서, 개인, 기타)
 
+    @NotBlank
     private String partnerName; //거래처명
 
+    @NotBlank
     private String repName;     //대표자
 
     private String tel;         //전화
 
     private String phone;       //휴대폰
+
+    private String addressMain; //주소1 (사업장 주소)
+
+    private String addressSub;  //주소2 (배송 주소)
 
     private String fax;         //팩스
 

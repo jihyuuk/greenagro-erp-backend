@@ -138,7 +138,7 @@ public class ProductService {
                     product.getSpec(),
                     product.getBoxQuantity(),
                     new ProductGroupDTO(group.getId(), group.getName()),
-                    new PartnerDTO(partner.getId(), partner.getBizName()),
+                    new PartnerDTO(partner.getId(), partner.getPartnerName()),
                     product.getTaxType().toString(),
                     product.getDistChannel().toString(),
                     product.getSalePrice()
@@ -163,7 +163,7 @@ public class ProductService {
                 product.getSpec(),
                 product.getBoxQuantity(),
                 new ProductGroupDTO(product.getProductGroup().getId(), product.getProductGroup().getName()),
-                new PartnerDTO(product.getPartner().getId(), product.getPartner().getBizName()),
+                new PartnerDTO(product.getPartner().getId(), product.getPartner().getPartnerName()),
                 product.getTaxType(),
                 product.getDistChannel(),
                 product.getPurchasePrice(),

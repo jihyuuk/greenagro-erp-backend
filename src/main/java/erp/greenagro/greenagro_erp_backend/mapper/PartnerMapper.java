@@ -1,46 +1,33 @@
 package erp.greenagro.greenagro_erp_backend.mapper;
 
-import erp.greenagro.greenagro_erp_backend.dto.partner.*;
+import erp.greenagro.greenagro_erp_backend.dto.partner.PartnerEditResponse;
+import erp.greenagro.greenagro_erp_backend.dto.partner.PartnerSummaryResponse;
+import erp.greenagro.greenagro_erp_backend.dto.partner.create.CreatePartnerBase;
+import erp.greenagro.greenagro_erp_backend.dto.partner.create.CreatePartnerResponse;
+import erp.greenagro.greenagro_erp_backend.dto.partner.detail.BizPartnerDetailResponse;
+import erp.greenagro.greenagro_erp_backend.dto.partner.detail.IndPartnerDetailResponse;
+import erp.greenagro.greenagro_erp_backend.dto.partner.detail.PartnerDetailBase;
+import erp.greenagro.greenagro_erp_backend.exception.CustomException;
+import erp.greenagro.greenagro_erp_backend.model.entity.BusinessPartner;
+import erp.greenagro.greenagro_erp_backend.model.entity.IndividualPartner;
 import erp.greenagro.greenagro_erp_backend.model.entity.Partner;
 import erp.greenagro.greenagro_erp_backend.model.enums.PartnerType;
 import erp.greenagro.greenagro_erp_backend.model.enums.SalesGroup;
+import erp.greenagro.greenagro_erp_backend.util.RrnCryptoUtil;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 import java.util.Arrays;
 
+import static erp.greenagro.greenagro_erp_backend.model.enums.ErrorCode.INTERNAL_SERVER_ERROR;
+
 @Component
+@RequiredArgsConstructor
 public class PartnerMapper {
 
-    /**
-     * CreatePartnerRequest ===> Partner 엔티티로 변환합니다.
-     */
-    public Partner fromCreate(CreatePartnerRequest request) {
-
-        return new Partner(
-                request.getPartnerType(),
-                request.getSalesGroup(),
-                request.getCorpNo(),
-                request.getBizNo(),
-                request.getRrn(),
-                request.getBizName(),
-                request.getCeoName(),
-                request.getBizType(),
-                request.getBizItem(),
-                request.getTel(),
-                request.getPhone(),
-                request.getAddressMain(),
-                request.getAddressSub(),
-                request.getFax(),
-                request.getEmail(),
-                request.getOurManager(),
-                request.getPartnerManager(),
-                request.getMemo()
-        );
-    }
-
+    private final RrnCryptoUtil rrnCryptoUtil;
 
     public CreatePartnerResponse toCreate(Partner partner) {
-
         return new CreatePartnerResponse(
                 partner.getId()
         );
@@ -49,15 +36,27 @@ public class PartnerMapper {
 
     public PartnerSummaryResponse toSummary(Partner partner) {
 
+        PartnerType partnerType = null;
+
+        if(partner instanceof BusinessPartner){
+            partnerType = PartnerType.BUSINESS;
+        }
+        else if(partner instanceof IndividualPartner){
+            partnerType = PartnerType.INDIVIDUAL;
+        }
+        else{
+            throw new CustomException(INTERNAL_SERVER_ERROR);
+        }
+
         return new PartnerSummaryResponse(
                 partner.getId(),
-                partner.getPartnerType(),
+                partner.getCode(),
+                partnerType,
                 partner.getSalesGroup(),
-                partner.getBizNo(),
-                partner.getRrn(),
-                partner.getBizName(),
-                partner.getCeoName(),
+                partner.getPartnerName(),
+                partner.getRepName(),
                 partner.getTel(),
+                partner.getPhone(),
                 partner.getFax(),
                 partner.getEmail(),
                 partner.getOurManager(),
@@ -67,29 +66,61 @@ public class PartnerMapper {
     }
 
 
-    public PartnerDetailResponse toDetail(Partner partner) {
+    public PartnerDetailBase toDetail(Partner partner){
 
-        return new PartnerDetailResponse(
-                partner.getId(),
-                partner.getPartnerType(),
-                partner.getSalesGroup(),
-                partner.getCorpNo(),
-                partner.getBizNo(),
-                partner.getRrn(),
-                partner.getBizName(),
-                partner.getCeoName(),
-                partner.getBizType(),
-                partner.getBizItem(),
-                partner.getTel(),
-                partner.getPhone(),
-                partner.getAddressMain(),
-                partner.getAddressSub(),
-                partner.getFax(),
-                partner.getEmail(),
-                partner.getOurManager(),
-                partner.getPartnerManager(),
-                partner.getMemo()
-        );
+        // --- 사업자 ---
+        if (partner instanceof BusinessPartner b) {
+            return new BizPartnerDetailResponse(
+                    b.getId(),
+                    b.getCode(),
+                    PartnerType.BUSINESS,
+                    b.getSalesGroup(),
+                    b.getPartnerName(),
+                    b.getRepName(),
+                    b.getTel(),
+                    b.getPhone(),
+                    b.getAddressMain(),
+                    b.getAddressSub(),
+                    b.getFax(),
+                    b.getEmail(),
+                    b.getOurManager(),
+                    b.getPartnerManager(),
+                    b.getMemo(),
+                    b.getBizNo(),
+                    b.getBizType(),
+                    b.getBizItem()
+            );
+        }
+
+        // --- 개인 ---
+        else if (partner instanceof IndividualPartner i) {
+            //주민번호 복호화
+            String rrnDecrypted = rrnCryptoUtil.decryptRrn(i.getRrnEncrypted());
+
+            return new IndPartnerDetailResponse(
+                    i.getId(),
+                    i.getCode(),
+                    PartnerType.INDIVIDUAL,
+                    i.getSalesGroup(),
+                    i.getPartnerName(),
+                    i.getRepName(),
+                    i.getTel(),
+                    i.getPhone(),
+                    i.getAddressMain(),
+                    i.getAddressSub(),
+                    i.getFax(),
+                    i.getEmail(),
+                    i.getOurManager(),
+                    i.getPartnerManager(),
+                    i.getMemo(),
+                    rrnDecrypted
+            );
+        }
+
+        // --- 안전망 ---
+        else {
+            throw new CustomException(INTERNAL_SERVER_ERROR);
+        }
     }
 
 

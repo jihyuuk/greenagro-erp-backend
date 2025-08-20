@@ -1,15 +1,17 @@
-package erp.greenagro.greenagro_erp_backend.dto.partner;
+package erp.greenagro.greenagro_erp_backend.dto.partner.detail;
 
 import erp.greenagro.greenagro_erp_backend.model.enums.PartnerType;
 import erp.greenagro.greenagro_erp_backend.model.enums.SalesGroup;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 @Getter
 @AllArgsConstructor
-public class PartnerSummaryResponse {
+public abstract class PartnerDetailBase {
 
-    private Long id;
+    private Long id; //거래처번호
 
     private String code;        //거래처 코드
 
@@ -24,6 +26,10 @@ public class PartnerSummaryResponse {
     private String tel;         //전화
 
     private String phone;       //휴대폰
+
+    private String addressMain; //주소1 (사업장 주소)
+
+    private String addressSub;  //주소2 (배송 주소)
 
     private String fax;         //팩스
 
