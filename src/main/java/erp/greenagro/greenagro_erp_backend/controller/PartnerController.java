@@ -2,8 +2,7 @@ package erp.greenagro.greenagro_erp_backend.controller;
 
 import erp.greenagro.greenagro_erp_backend.dto.partner.PartnerEditResponse;
 import erp.greenagro.greenagro_erp_backend.dto.partner.PartnerSummaryResponse;
-import erp.greenagro.greenagro_erp_backend.dto.partner.create.CreateBizPartnerRequest;
-import erp.greenagro.greenagro_erp_backend.dto.partner.create.CreateIndPartnerRequest;
+import erp.greenagro.greenagro_erp_backend.dto.partner.create.CreatePartnerBase;
 import erp.greenagro.greenagro_erp_backend.dto.partner.create.CreatePartnerResponse;
 import erp.greenagro.greenagro_erp_backend.dto.partner.detail.PartnerDetailBase;
 import erp.greenagro.greenagro_erp_backend.dto.partner.update.UpdateBizPartnerRequest;
@@ -23,18 +22,10 @@ public class PartnerController {
     private final PartnerService partnerService;
 
 
-    //거래처 생성 - 사업자
-    @PostMapping("/partners/business")
-    public ResponseEntity<CreatePartnerResponse> createPartner(@Valid @RequestBody CreateBizPartnerRequest request){
-        CreatePartnerResponse response = partnerService.createBizPartner(request);
-        return ResponseEntity.ok(response);
-    }
-
-
-    //거래처 생성 - 개인
-    @PostMapping("/partners/individual")
-    public ResponseEntity<CreatePartnerResponse> createPartner(@Valid @RequestBody CreateIndPartnerRequest request){
-        CreatePartnerResponse response = partnerService.createIndPartner(request);
+    //거래처 생성 - (사업자, 개인)
+    @PostMapping("/partners")
+    public ResponseEntity<CreatePartnerResponse> createPartner(@Valid @RequestBody CreatePartnerBase request){
+        CreatePartnerResponse response = partnerService.createPartner(request);
         return ResponseEntity.ok(response);
     }
 

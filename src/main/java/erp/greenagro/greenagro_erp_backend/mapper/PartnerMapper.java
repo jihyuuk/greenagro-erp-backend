@@ -2,6 +2,8 @@ package erp.greenagro.greenagro_erp_backend.mapper;
 
 import erp.greenagro.greenagro_erp_backend.dto.partner.PartnerEditResponse;
 import erp.greenagro.greenagro_erp_backend.dto.partner.PartnerSummaryResponse;
+import erp.greenagro.greenagro_erp_backend.dto.partner.create.CreateBizPartnerRequest;
+import erp.greenagro.greenagro_erp_backend.dto.partner.create.CreateIndPartnerRequest;
 import erp.greenagro.greenagro_erp_backend.dto.partner.create.CreatePartnerBase;
 import erp.greenagro.greenagro_erp_backend.dto.partner.create.CreatePartnerResponse;
 import erp.greenagro.greenagro_erp_backend.dto.partner.detail.BizPartnerDetailResponse;
@@ -26,6 +28,56 @@ import static erp.greenagro.greenagro_erp_backend.model.enums.ErrorCode.INTERNAL
 public class PartnerMapper {
 
     private final RrnCryptoUtil rrnCryptoUtil;
+
+
+    public Partner toEntity(CreatePartnerBase request){
+
+        // --- 사업자 ---
+        if(request instanceof CreateBizPartnerRequest br){
+            return  new BusinessPartner(
+                    br.getSalesGroup(),
+                    br.getCode(),
+                    br.getPartnerName(),
+                    br.getRepName(),
+                    br.getTel(),
+                    br.getPhone(),
+                    br.getAddressMain(),
+                    br.getAddressSub(),
+                    br.getFax(),
+                    br.getEmail(),
+                    br.getOurManager(),
+                    br.getPartnerManager(),
+                    br.getMemo(),
+                    br.getBizNo(),
+                    br.getBizType(),
+                    br.getBizItem()
+            );
+
+            //--- 개인 ---
+        } else if (request instanceof CreateIndPartnerRequest ir) {
+            return  new IndividualPartner(
+                    ir.getSalesGroup(),
+                    ir.getCode(),
+                    ir.getPartnerName(),
+                    ir.getRepName(),
+                    ir.getTel(),
+                    ir.getPhone(),
+                    ir.getAddressMain(),
+                    ir.getAddressSub(),
+                    ir.getFax(),
+                    ir.getEmail(),
+                    ir.getOurManager(),
+                    ir.getPartnerManager(),
+                    ir.getMemo(),
+                    rrnCryptoUtil.encryptRrn(ir.getRrn()) //주민번호 암호화
+            );
+
+            //--- 예외 ---
+        }else {
+            throw new CustomException(INTERNAL_SERVER_ERROR);
+        }
+
+    }
 
     public CreatePartnerResponse toCreate(Partner partner) {
         return new CreatePartnerResponse(

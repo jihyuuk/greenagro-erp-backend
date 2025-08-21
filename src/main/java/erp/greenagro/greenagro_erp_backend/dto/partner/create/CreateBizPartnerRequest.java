@@ -1,11 +1,13 @@
 package erp.greenagro.greenagro_erp_backend.dto.partner.create;
 
+import com.fasterxml.jackson.annotation.JsonTypeName;
 import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 @Getter
 @AllArgsConstructor
+@JsonTypeName("BUSINESS")
 public class CreateBizPartnerRequest extends CreatePartnerBase{
 
     @NotBlank

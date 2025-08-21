@@ -4,6 +4,7 @@ import erp.greenagro.greenagro_erp_backend.dto.partner.PartnerEditResponse;
 import erp.greenagro.greenagro_erp_backend.dto.partner.PartnerSummaryResponse;
 import erp.greenagro.greenagro_erp_backend.dto.partner.create.CreateBizPartnerRequest;
 import erp.greenagro.greenagro_erp_backend.dto.partner.create.CreateIndPartnerRequest;
+import erp.greenagro.greenagro_erp_backend.dto.partner.create.CreatePartnerBase;
 import erp.greenagro.greenagro_erp_backend.dto.partner.create.CreatePartnerResponse;
 import erp.greenagro.greenagro_erp_backend.dto.partner.detail.PartnerDetailBase;
 import erp.greenagro.greenagro_erp_backend.dto.partner.update.UpdateBizPartnerRequest;
@@ -39,7 +40,7 @@ public class PartnerService {
 
     //거래처 생성(사업자)
     @Transactional
-    public CreatePartnerResponse createBizPartner(CreateBizPartnerRequest request) {
+    public CreatePartnerResponse createPartner(CreatePartnerBase request) {
         //1. 각종 검증
 
         //2. 중복확인 - 거래처명, 사업자번호, 주민번호 <- 중복허용
@@ -50,68 +51,13 @@ public class PartnerService {
 
 
         //3. 객체 생성 (주민번호의 경우 암호화 필요)
-        BusinessPartner bizPartner = new BusinessPartner(
-                request.getSalesGroup(),
-                request.getCode(),
-                request.getPartnerName(),
-                request.getRepName(),
-                request.getTel(),
-                request.getPhone(),
-                request.getAddressMain(),
-                request.getAddressSub(),
-                request.getFax(),
-                request.getEmail(),
-                request.getOurManager(),
-                request.getPartnerManager(),
-                request.getMemo(),
-                request.getBizNo(),
-                request.getBizType(),
-                request.getBizItem()
-        );
+        Partner partner = partnerMapper.toEntity(request);
 
         //3. 저장
-        BusinessPartner savedBizPartner = bizPartnerRepo.save(bizPartner);
+        Partner savedPartner = partnerRepository.save(partner);
 
         //4. id 반환
-        return partnerMapper.toCreate(savedBizPartner);
-    }
-
-
-    //거래처 생성(개인)
-    @Transactional
-    public CreatePartnerResponse createIndPartner(CreateIndPartnerRequest request) {
-        //1. 각종 검증
-
-        //2. 중복확인 - 거래처명, 사업자번호, 주민번호 <- 중복허용
-        DuplicationValidator.validate(dv -> dv
-                //코드 중복 확인
-                .check(partnerRepository.existsByCode(request.getCode()),"code", request.getCode())
-        );
-
-
-        //3. 객체 생성 (주민번호의 경우 암호화 필요)
-        IndividualPartner indPartner = new IndividualPartner(
-                request.getSalesGroup(),
-                request.getCode(),
-                request.getPartnerName(),
-                request.getRepName(),
-                request.getTel(),
-                request.getPhone(),
-                request.getAddressMain(),
-                request.getAddressSub(),
-                request.getFax(),
-                request.getEmail(),
-                request.getOurManager(),
-                request.getPartnerManager(),
-                request.getMemo(),
-                rrnCryptoUtil.encryptRrn(request.getRrn()) //주민번호 암호화
-        );
-
-        //3. 저장
-        IndividualPartner savedIndPartner = indPartnerRepo.save(indPartner);
-
-        //4. id 반환
-        return new CreatePartnerResponse(savedIndPartner.getId());
+        return partnerMapper.toCreate(savedPartner);
     }
 
 
