@@ -10,6 +10,7 @@ public enum ErrorCode {
 
     // 400 Bad Request
     INVALID_INPUT_VALUE(HttpStatus.BAD_REQUEST, "B001", "유효하지 않은 입력값입니다."),
+    INVALID_PARTNER_TYPE(HttpStatus.BAD_REQUEST, "B002", "유효하지 않은 거래처 타입입니다."),
 
     // 401 Unauthorized
     INVALID_CREDENTIALS(HttpStatus.UNAUTHORIZED, "A001", "직원명 또는 비밀번호가 올바르지 않습니다."),

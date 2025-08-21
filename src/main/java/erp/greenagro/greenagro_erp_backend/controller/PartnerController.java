@@ -5,8 +5,7 @@ import erp.greenagro.greenagro_erp_backend.dto.partner.PartnerSummaryResponse;
 import erp.greenagro.greenagro_erp_backend.dto.partner.create.CreatePartnerBase;
 import erp.greenagro.greenagro_erp_backend.dto.partner.create.CreatePartnerResponse;
 import erp.greenagro.greenagro_erp_backend.dto.partner.detail.PartnerDetailBase;
-import erp.greenagro.greenagro_erp_backend.dto.partner.update.UpdateBizPartnerRequest;
-import erp.greenagro.greenagro_erp_backend.dto.partner.update.UpdateIndPartnerRequest;
+import erp.greenagro.greenagro_erp_backend.dto.partner.update.UpdatePartnerBase;
 import erp.greenagro.greenagro_erp_backend.service.PartnerService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -54,18 +53,10 @@ public class PartnerController {
     }
 
 
-    //거래처 수정 - 사업자
-    @PutMapping("/partners/business/{id}")
-    public ResponseEntity<Void> updateBizPartner(@PathVariable Long id, @Valid @RequestBody UpdateBizPartnerRequest request){
-        partnerService.updateBizPartner(id, request);
-        return ResponseEntity.noContent().build();
-    }
-
-
-    //거래처 수정 - 개인
-    @PutMapping("/partners/individual/{id}")
-    public ResponseEntity<Void> updateIndPartner(@PathVariable Long id, @Valid @RequestBody UpdateIndPartnerRequest request){
-        partnerService.updateIndPartner(id, request);
+    //거래처 수정 - (사업자, 개인)
+    @PutMapping("/partners/{id}")
+    public ResponseEntity<Void> updatePartner(@PathVariable Long id, @Valid @RequestBody UpdatePartnerBase request){
+        partnerService.updatePartner(id, request);
         return ResponseEntity.noContent().build();
     }
 

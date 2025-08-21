@@ -2,13 +2,12 @@ package erp.greenagro.greenagro_erp_backend.service;
 
 import erp.greenagro.greenagro_erp_backend.dto.partner.PartnerEditResponse;
 import erp.greenagro.greenagro_erp_backend.dto.partner.PartnerSummaryResponse;
-import erp.greenagro.greenagro_erp_backend.dto.partner.create.CreateBizPartnerRequest;
-import erp.greenagro.greenagro_erp_backend.dto.partner.create.CreateIndPartnerRequest;
 import erp.greenagro.greenagro_erp_backend.dto.partner.create.CreatePartnerBase;
 import erp.greenagro.greenagro_erp_backend.dto.partner.create.CreatePartnerResponse;
 import erp.greenagro.greenagro_erp_backend.dto.partner.detail.PartnerDetailBase;
 import erp.greenagro.greenagro_erp_backend.dto.partner.update.UpdateBizPartnerRequest;
 import erp.greenagro.greenagro_erp_backend.dto.partner.update.UpdateIndPartnerRequest;
+import erp.greenagro.greenagro_erp_backend.dto.partner.update.UpdatePartnerBase;
 import erp.greenagro.greenagro_erp_backend.exception.CustomException;
 import erp.greenagro.greenagro_erp_backend.mapper.PartnerMapper;
 import erp.greenagro.greenagro_erp_backend.model.entity.BusinessPartner;
@@ -32,10 +31,7 @@ import static erp.greenagro.greenagro_erp_backend.model.enums.ErrorCode.*;
 public class PartnerService {
 
     private final PartnerRepository partnerRepository;
-    private final IndividualPartnerRepository indPartnerRepo;
-    private final BusinessPartnerRepository bizPartnerRepo;
     private final PartnerMapper partnerMapper;
-    private final RrnCryptoUtil rrnCryptoUtil;
 
 
     //거래처 생성(사업자)
@@ -93,11 +89,11 @@ public class PartnerService {
     }
 
 
-    //수정 - 사업자
+    //수정 - (사업자, 개인)
     @Transactional
-    public void updateBizPartner(Long id, UpdateBizPartnerRequest request) {
+    public void updatePartner(Long id, UpdatePartnerBase request) {
         //1. 해당 거래처 조회 (없으면 에러)
-        BusinessPartner partner = bizPartnerRepo.findById(id).orElseThrow(() -> new CustomException(PARTNER_NOT_FOUND, id));
+        Partner partner = partnerRepository.findById(id).orElseThrow(() -> new CustomException(PARTNER_NOT_FOUND, id));
 
         //2. 중복 검사
         DuplicationValidator.validate(dv -> dv
@@ -105,58 +101,14 @@ public class PartnerService {
                 .check(!partner.getCode().equals(request.getCode()) && partnerRepository.existsByCode(request.getCode()), "code", request.getCode())
         );
 
-        //3. 업데이트
-        partner.update(
-                request.getSalesGroup(),
-                request.getCode(),
-                request.getPartnerName(),
-                request.getRepName(),
-                request.getTel(),
-                request.getPhone(),
-                request.getAddressMain(),
-                request.getAddressSub(),
-                request.getFax(),
-                request.getEmail(),
-                request.getOurManager(),
-                request.getPartnerManager(),
-                request.getMemo(),
-                request.getBizNo(),
-                request.getBizType(),
-                request.getBizItem()
-        );
-
-    }
-
-
-    //수정 - 개인
-    @Transactional
-    public void updateIndPartner(Long id, UpdateIndPartnerRequest request) {
-        //1. 해당 거래처 조회 (없으면 에러)
-        IndividualPartner partner = indPartnerRepo.findById(id).orElseThrow(() -> new CustomException(PARTNER_NOT_FOUND, id));
-
-        //2. 중복 검사
-        DuplicationValidator.validate(dv -> dv
-                //코드 중복 체크
-                .check(!partner.getCode().equals(request.getCode()) && partnerRepository.existsByCode(request.getCode()), "code", request.getCode())
-        );
-
-        //3. 업데이트
-        partner.update(
-                request.getSalesGroup(),
-                request.getCode(),
-                request.getPartnerName(),
-                request.getRepName(),
-                request.getTel(),
-                request.getPhone(),
-                request.getAddressMain(),
-                request.getAddressSub(),
-                request.getFax(),
-                request.getEmail(),
-                request.getOurManager(),
-                request.getPartnerManager(),
-                request.getMemo(),
-                rrnCryptoUtil.encryptRrn(request.getRrn()) // 주민번호 암호화
-        );
+        //3. 업데이트 - PartnerType이 일치해야함
+        if (partner instanceof BusinessPartner bp && request instanceof UpdateBizPartnerRequest br){
+            partnerMapper.update(bp, br);
+        } else if (partner instanceof IndividualPartner ip && request instanceof UpdateIndPartnerRequest ir) {
+            partnerMapper.update(ip, ir);
+        }else {
+            throw new CustomException(INVALID_PARTNER_TYPE);
+        }
     }
 
 

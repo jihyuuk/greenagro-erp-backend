@@ -9,6 +9,8 @@ import erp.greenagro.greenagro_erp_backend.dto.partner.create.CreatePartnerRespo
 import erp.greenagro.greenagro_erp_backend.dto.partner.detail.BizPartnerDetailResponse;
 import erp.greenagro.greenagro_erp_backend.dto.partner.detail.IndPartnerDetailResponse;
 import erp.greenagro.greenagro_erp_backend.dto.partner.detail.PartnerDetailBase;
+import erp.greenagro.greenagro_erp_backend.dto.partner.update.UpdateBizPartnerRequest;
+import erp.greenagro.greenagro_erp_backend.dto.partner.update.UpdateIndPartnerRequest;
 import erp.greenagro.greenagro_erp_backend.exception.CustomException;
 import erp.greenagro.greenagro_erp_backend.model.entity.BusinessPartner;
 import erp.greenagro.greenagro_erp_backend.model.entity.IndividualPartner;
@@ -182,6 +184,52 @@ public class PartnerMapper {
                 toDetail(partner),
                 Arrays.stream(PartnerType.values()).toList(),
                 Arrays.stream(SalesGroup.values()).toList()
+        );
+    }
+
+
+    public void update(BusinessPartner businessPartner, UpdateBizPartnerRequest request) {
+
+        businessPartner.update(
+                request.getSalesGroup(),
+                request.getCode(),
+                request.getPartnerName(),
+                request.getRepName(),
+                request.getTel(),
+                request.getPhone(),
+                request.getAddressMain(),
+                request.getAddressSub(),
+                request.getFax(),
+                request.getEmail(),
+                request.getOurManager(),
+                request.getPartnerManager(),
+                request.getMemo(),
+                request.getBizNo(),
+                request.getBizType(),
+                request.getBizItem()
+        );
+    }
+
+
+    public void update(IndividualPartner individualPartner, UpdateIndPartnerRequest request) {
+        //주민번호 암호화
+        String encryptRrn = rrnCryptoUtil.encryptRrn(request.getRrn());
+
+        individualPartner.update(
+                request.getSalesGroup(),
+                request.getCode(),
+                request.getPartnerName(),
+                request.getRepName(),
+                request.getTel(),
+                request.getPhone(),
+                request.getAddressMain(),
+                request.getAddressSub(),
+                request.getFax(),
+                request.getEmail(),
+                request.getOurManager(),
+                request.getPartnerManager(),
+                request.getMemo(),
+                encryptRrn
         );
     }
 
