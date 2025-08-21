@@ -10,6 +10,7 @@ public enum ErrorCode {
 
     // 400 Bad Request
     INVALID_INPUT_VALUE(HttpStatus.BAD_REQUEST, "B001", "유효하지 않은 입력값입니다."),
+    INVALID_PARTNER_TYPE(HttpStatus.BAD_REQUEST, "B002", "유효하지 않은 거래처 타입입니다."),
 
     // 401 Unauthorized
     INVALID_CREDENTIALS(HttpStatus.UNAUTHORIZED, "A001", "직원명 또는 비밀번호가 올바르지 않습니다."),
@@ -19,7 +20,7 @@ public enum ErrorCode {
     // 404 NotFound
     BRANCH_NOT_FOUND(HttpStatus.NOT_FOUND, "N001", "해당 지점을 찾을 수 없습니다."),
     EMPLOYEE_NOT_FOUND(HttpStatus.NOT_FOUND, "N001", "해당 직원을 찾을 수 없습니다."),
-    CUSTOMER_NOT_FOUND(HttpStatus.NOT_FOUND, "N001", "해당 거래처를 찾을 수 없습니다."),
+    PARTNER_NOT_FOUND(HttpStatus.NOT_FOUND, "N001", "해당 거래처를 찾을 수 없습니다."),
     PRODUCT_NOT_FOUND(HttpStatus.NOT_FOUND, "N001", "해당 품목을 찾을 수 없습니다."),
     PRODUCT_GROUP_NOT_FOUND(HttpStatus.NOT_FOUND, "N001", "해당 품목 그룹을 찾을 수 없습니다."),
     WAREHOUSE_SITE_NOT_FOUND(HttpStatus.NOT_FOUND, "N001", "해당 창고 지점을 찾을 수 없습니다."),

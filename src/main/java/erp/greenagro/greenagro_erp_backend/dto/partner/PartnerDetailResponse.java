@@ -1,19 +1,18 @@
-package erp.greenagro.greenagro_erp_backend.dto.customer;
+package erp.greenagro.greenagro_erp_backend.dto.partner;
 
-import erp.greenagro.greenagro_erp_backend.model.enums.CustomerType;
+import erp.greenagro.greenagro_erp_backend.model.enums.PartnerType;
 import erp.greenagro.greenagro_erp_backend.model.enums.SalesGroup;
-import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 @Getter
 @AllArgsConstructor
-public class CreateCustomerRequest {
+public class PartnerDetailResponse {
 
-    @NotNull
-    private CustomerType customerType; //사업자 유형 (법인사업자, 개인사업자, 개인)
+    private Long id; //거래처번호
 
-    @NotNull
+    private PartnerType partnerType; //사업자 유형 (법인사업자, 개인사업자, 개인)
+
     private SalesGroup salesGroup;    //영업 분류 (조경, 농협, 관공서, 개인, 기타)
 
     private String corpNo;      //법인번호 (법인사업자만)
@@ -44,7 +43,7 @@ public class CreateCustomerRequest {
 
     private String ourManager;  //우리 담당자 (우리 회사 직원)
 
-    private String customerManager; //거래처 담당자 (고객 회사 직원)
+    private String partnerManager; //거래처 담당자 (거래처 회사 직원)
 
     private String memo;        //비고
 

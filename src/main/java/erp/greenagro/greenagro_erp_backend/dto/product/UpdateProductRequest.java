@@ -21,7 +21,7 @@ public class UpdateProductRequest {
 
     private Long productGroupId;            //품목 그룹
 
-    private Long customerId;                //회사
+    private Long partnerId;                //회사
 
     private TaxType taxType;                //세금 타입(영,과세)
 

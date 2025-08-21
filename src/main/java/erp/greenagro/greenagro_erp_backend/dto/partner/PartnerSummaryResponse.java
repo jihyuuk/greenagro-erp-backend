@@ -1,0 +1,38 @@
+package erp.greenagro.greenagro_erp_backend.dto.partner;
+
+import erp.greenagro.greenagro_erp_backend.model.enums.PartnerType;
+import erp.greenagro.greenagro_erp_backend.model.enums.SalesGroup;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+
+@Getter
+@AllArgsConstructor
+public class PartnerSummaryResponse {
+
+    private Long id;
+
+    private String code;        //거래처 코드
+
+    private PartnerType partnerType; //사업자 유형 (법인사업자, 개인사업자, 개인)
+
+    private SalesGroup salesGroup;   //영업 분류 (조경, 농협, 관공서, 개인, 기타)
+
+    private String partnerName; //거래처명
+
+    private String repName;     //대표자
+
+    private String tel;         //전화
+
+    private String phone;       //휴대폰
+
+    private String fax;         //팩스
+
+    private String email;       //이메일
+
+    private String ourManager;  //우리 담당자 (우리 회사 직원)
+
+    private String partnerManager; //거래처 담당자 (거래처 회사 직원)
+
+    private String memo;        //비고
+
+}

@@ -1,16 +1,16 @@
 package erp.greenagro.greenagro_erp_backend.service;
 
-import erp.greenagro.greenagro_erp_backend.dto.customer.CustomerDTO;
+import erp.greenagro.greenagro_erp_backend.dto.partner.PartnerDTO;
 import erp.greenagro.greenagro_erp_backend.dto.exception.LookupDTO;
 import erp.greenagro.greenagro_erp_backend.dto.product.*;
 import erp.greenagro.greenagro_erp_backend.dto.productgroup.CreateProductGroupRequest;
 import erp.greenagro.greenagro_erp_backend.dto.productgroup.CreateProductGroupResponse;
 import erp.greenagro.greenagro_erp_backend.dto.productgroup.ProductGroupDTO;
 import erp.greenagro.greenagro_erp_backend.exception.CustomException;
-import erp.greenagro.greenagro_erp_backend.model.entity.Customer;
+import erp.greenagro.greenagro_erp_backend.model.entity.Partner;
 import erp.greenagro.greenagro_erp_backend.model.entity.Product;
 import erp.greenagro.greenagro_erp_backend.model.entity.ProductGroup;
-import erp.greenagro.greenagro_erp_backend.repository.CustomerRepository;
+import erp.greenagro.greenagro_erp_backend.repository.PartnerRepository;
 import erp.greenagro.greenagro_erp_backend.repository.ProductGroupRepository;
 import erp.greenagro.greenagro_erp_backend.repository.ProductRepository;
 import erp.greenagro.greenagro_erp_backend.validator.DuplicationValidator;
@@ -28,7 +28,7 @@ public class ProductService {
 
     private final ProductRepository productRepository;
     private final ProductGroupRepository productGroupRepository;
-    private final CustomerRepository customerRepository;
+    private final PartnerRepository partnerRepository;
 
 
     //품목 생성
@@ -48,9 +48,9 @@ public class ProductService {
             productGroup = productGroupRepository.findById(request.getProductGroupId()).orElseThrow(() -> new CustomException(PRODUCT_GROUP_NOT_FOUND, request.getProductGroupId()));
 
         //3. 회사 조회
-        Customer customer = null;
-        if(request.getCustomerId() != null)
-            customer = customerRepository.findById(request.getCustomerId()).orElseThrow(() -> new CustomException(EMPLOYEE_NOT_FOUND, request.getCustomerId()));
+        Partner partner = null;
+        if(request.getPartnerId() != null)
+            partner = partnerRepository.findById(request.getPartnerId()).orElseThrow(() -> new CustomException(EMPLOYEE_NOT_FOUND, request.getPartnerId()));
 
         //4. 엔티티 생성
         Product product = new Product(
@@ -60,7 +60,7 @@ public class ProductService {
                 request.getSpec(),
                 request.getBoxQuantity(),
                 productGroup,
-                customer,
+                partner,
                 request.getTaxType(),
                 request.getDistChannel(),
                 request.getPurchasePrice(),
@@ -95,9 +95,9 @@ public class ProductService {
             productGroup = productGroupRepository.findById(request.getProductGroupId()).orElseThrow(() -> new CustomException(PRODUCT_GROUP_NOT_FOUND, request.getProductGroupId()));
 
         //4. 회사 조회
-        Customer customer = null;
-        if(request.getCustomerId() != null)
-            customer = customerRepository.findById(request.getCustomerId()).orElseThrow(() -> new CustomException(CUSTOMER_NOT_FOUND, request.getCustomerId()));
+        Partner partner = null;
+        if(request.getPartnerId() != null)
+            partner = partnerRepository.findById(request.getPartnerId()).orElseThrow(() -> new CustomException(PARTNER_NOT_FOUND, request.getPartnerId()));
 
 
         //5. 수정하기
@@ -108,7 +108,7 @@ public class ProductService {
                 request.getSpec(),
                 request.getBoxQuantity(),
                 productGroup,
-                customer,
+                partner,
                 request.getTaxType(),
                 request.getDistChannel(),
                 request.getPurchasePrice(),
@@ -128,7 +128,7 @@ public class ProductService {
         return products.stream().map(product -> {
 
             ProductGroup group = product.getProductGroup();
-            Customer customer = product.getCustomer();
+            Partner partner = product.getPartner();
 
             return new ProductSummaryResponse(
                     product.getId(),
@@ -138,7 +138,7 @@ public class ProductService {
                     product.getSpec(),
                     product.getBoxQuantity(),
                     new ProductGroupDTO(group.getId(), group.getName()),
-                    new CustomerDTO(customer.getId(), customer.getBizName()),
+                    new PartnerDTO(partner.getId(), partner.getPartnerName()),
                     product.getTaxType().toString(),
                     product.getDistChannel().toString(),
                     product.getSalePrice()
@@ -163,7 +163,7 @@ public class ProductService {
                 product.getSpec(),
                 product.getBoxQuantity(),
                 new ProductGroupDTO(product.getProductGroup().getId(), product.getProductGroup().getName()),
-                new CustomerDTO(product.getCustomer().getId(), product.getCustomer().getBizName()),
+                new PartnerDTO(product.getPartner().getId(), product.getPartner().getPartnerName()),
                 product.getTaxType(),
                 product.getDistChannel(),
                 product.getPurchasePrice(),

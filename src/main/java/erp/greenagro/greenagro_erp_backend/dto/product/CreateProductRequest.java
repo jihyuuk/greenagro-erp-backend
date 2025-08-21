@@ -1,10 +1,7 @@
 package erp.greenagro.greenagro_erp_backend.dto.product;
 
-import erp.greenagro.greenagro_erp_backend.model.entity.Customer;
-import erp.greenagro.greenagro_erp_backend.model.entity.ProductGroup;
 import erp.greenagro.greenagro_erp_backend.model.enums.DistChannel;
 import erp.greenagro.greenagro_erp_backend.model.enums.TaxType;
-import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
@@ -24,7 +21,7 @@ public class CreateProductRequest {
 
     private Long productGroupId;            //품목 그룹
 
-    private Long customerId;                //회사
+    private Long partnerId;                //회사
 
     private TaxType taxType;                //세금 타입(영,과세)
 

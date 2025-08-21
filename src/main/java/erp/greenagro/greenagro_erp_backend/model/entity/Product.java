@@ -32,8 +32,8 @@ public class Product {
     private ProductGroup productGroup;      //품목 그룹
 
     @ManyToOne
-    @JoinColumn(name = "customer_id")
-    private Customer customer;              //회사
+    @JoinColumn(name = "partner_id")
+    private Partner partner;              //회사
 
     @Enumerated(EnumType.STRING)
     private TaxType taxType;                //세금 타입(영,과세)
@@ -48,14 +48,14 @@ public class Product {
     private String memo;                    //비고
 
 
-    public Product(String imgUrl, String code, String name, String spec, Long boxQuantity, ProductGroup productGroup, Customer customer, TaxType taxType, DistChannel distChannel, Long purchasePrice, Long salePrice, String memo) {
+    public Product(String imgUrl, String code, String name, String spec, Long boxQuantity, ProductGroup productGroup, Partner partner, TaxType taxType, DistChannel distChannel, Long purchasePrice, Long salePrice, String memo) {
         this.imgUrl = imgUrl;
         this.code = code;
         this.name = name;
         this.spec = spec;
         this.boxQuantity = boxQuantity;
         this.productGroup = productGroup;
-        this.customer = customer;
+        this.partner = partner;
         this.taxType = taxType;
         this.distChannel = distChannel;
         this.purchasePrice = purchasePrice;
@@ -66,14 +66,14 @@ public class Product {
 
 
     //수정하기
-    public void update(String imgUrl, String code, String name, String spec, Long boxQuantity, ProductGroup productGroup, Customer customer, TaxType taxType, DistChannel distChannel, Long purchasePrice, Long salePrice, String memo) {
+    public void update(String imgUrl, String code, String name, String spec, Long boxQuantity, ProductGroup productGroup, Partner partner, TaxType taxType, DistChannel distChannel, Long purchasePrice, Long salePrice, String memo) {
         this.imgUrl = imgUrl;
         this.code = code;
         this.name = name;
         this.spec = spec;
         this.boxQuantity = boxQuantity;
         this.productGroup = productGroup;
-        this.customer = customer;
+        this.partner = partner;
         this.taxType = taxType;
         this.distChannel = distChannel;
         this.purchasePrice = purchasePrice;

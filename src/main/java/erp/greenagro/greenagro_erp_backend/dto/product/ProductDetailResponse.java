@@ -1,6 +1,6 @@
 package erp.greenagro.greenagro_erp_backend.dto.product;
 
-import erp.greenagro.greenagro_erp_backend.dto.customer.CustomerDTO;
+import erp.greenagro.greenagro_erp_backend.dto.partner.PartnerDTO;
 import erp.greenagro.greenagro_erp_backend.dto.productgroup.ProductGroupDTO;
 import erp.greenagro.greenagro_erp_backend.model.enums.DistChannel;
 import erp.greenagro.greenagro_erp_backend.model.enums.TaxType;
@@ -25,7 +25,7 @@ public class ProductDetailResponse {
 
     private ProductGroupDTO productGroup;      //품목 그룹
 
-    private CustomerDTO customer;              //회사
+    private PartnerDTO partner;              //회사
 
     private TaxType taxType;                //세금 타입(영,과세)
 
