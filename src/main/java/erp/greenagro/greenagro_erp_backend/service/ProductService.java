@@ -8,19 +8,24 @@ import erp.greenagro.greenagro_erp_backend.dto.productgroup.CreateProductGroupRe
 import erp.greenagro.greenagro_erp_backend.dto.productgroup.ProductGroupDTO;
 import erp.greenagro.greenagro_erp_backend.exception.CustomException;
 import erp.greenagro.greenagro_erp_backend.model.entity.Partner;
+import erp.greenagro.greenagro_erp_backend.model.entity.PesticideDetail;
 import erp.greenagro.greenagro_erp_backend.model.entity.Product;
 import erp.greenagro.greenagro_erp_backend.model.entity.ProductGroup;
+import erp.greenagro.greenagro_erp_backend.model.enums.ProductGroupType;
 import erp.greenagro.greenagro_erp_backend.repository.PartnerRepository;
 import erp.greenagro.greenagro_erp_backend.repository.ProductGroupRepository;
 import erp.greenagro.greenagro_erp_backend.repository.ProductRepository;
+import erp.greenagro.greenagro_erp_backend.strategy.ProductDetailUpdateStrategy;
 import erp.greenagro.greenagro_erp_backend.validator.DuplicationValidator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Map;
 
 import static erp.greenagro.greenagro_erp_backend.model.enums.ErrorCode.*;
+import static erp.greenagro.greenagro_erp_backend.model.enums.ProductGroupType.*;
 
 @Service
 @RequiredArgsConstructor
@@ -41,37 +46,44 @@ public class ProductService {
                 .check(productRepository.existsByName(request.getName()), "name", request.getName())
         );
 
+        //2. 품목 그룹 조회 (그룹 강제)
+        ProductGroup group = productGroupRepository.findById(request.getProductGroupId()).orElseThrow(() -> new CustomException(PRODUCT_GROUP_NOT_FOUND, request.getProductGroupId()));
 
-        //2. 품목 그룹 조회
-        ProductGroup productGroup = null;
-        if(request.getProductGroupId() != null)
-            productGroup = productGroupRepository.findById(request.getProductGroupId()).orElseThrow(() -> new CustomException(PRODUCT_GROUP_NOT_FOUND, request.getProductGroupId()));
+        //3. 회사 조회 (회사 강제)
+        Partner partner = partnerRepository.findById(request.getPartnerId()).orElseThrow(() -> new CustomException(EMPLOYEE_NOT_FOUND, request.getPartnerId()));
 
-        //3. 회사 조회
-        Partner partner = null;
-        if(request.getPartnerId() != null)
-            partner = partnerRepository.findById(request.getPartnerId()).orElseThrow(() -> new CustomException(EMPLOYEE_NOT_FOUND, request.getPartnerId()));
 
-        //4. 엔티티 생성
-        Product product = new Product(
-                request.getImgUrl(),
-                request.getCode(),
-                request.getName(),
-                request.getSpec(),
-                request.getBoxQuantity(),
-                productGroup,
-                partner,
-                request.getTaxType(),
-                request.getDistChannel(),
-                request.getPurchasePrice(),
-                request.getSalePrice(),
-                request.getMemo()
-        );
+        //4. 품목 빌더 생성 및 공통 필드 입력
+        Product.ProductBuilder productBuilder = Product.builder()
+                .imgUrl(request.getImgUrl())
+                .code(request.getCode())
+                .name(request.getName())
+                .spec(request.getSpec())
+                .boxQuantity(request.getBoxQuantity())
+                .productGroup(group)
+                .partner(partner)
+                .taxType(request.getTaxType())
+                .distChannel(request.getDistChannel())
+                .purchasePrice(request.getPurchasePrice())
+                .salePrice(request.getSalePrice())
+                .memo(request.getMemo());
 
-        //5. 저장
+
+        //5. 농약 일때 추가 필드
+        if(group.getType() == PESTICIDE){
+            PesticideDetail pesticideDetail = new PesticideDetail(request.getIngredient(), request.getTargetPest());
+            productBuilder.pesticideDetail(pesticideDetail);
+        }
+        //커스텀 그룹 필요할때 여기에 추가하면 됌
+
+
+        //6. 빌더 -> 엔티티
+        Product product = productBuilder.build();
+
+        //7. 저장
         productRepository.save(product);
 
-        //6. id 반한
+        //8. id 반한
         return new CreateProductResponse(product.getId());
     }
 
