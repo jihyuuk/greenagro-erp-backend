@@ -1,4 +1,4 @@
-package erp.greenagro.greenagro_erp_backend.strategy;
+package erp.greenagro.greenagro_erp_backend.strategy.product_update;
 
 import erp.greenagro.greenagro_erp_backend.dto.product.UpdateProductRequest;
 import erp.greenagro.greenagro_erp_backend.model.entity.PesticideDetail;
@@ -6,13 +6,13 @@ import erp.greenagro.greenagro_erp_backend.model.entity.Product;
 import erp.greenagro.greenagro_erp_backend.model.entity.ProductGroup;
 import org.springframework.stereotype.Component;
 
-@Component("PESTICIDE")
+@Component("PESTICIDE_UPDATE")
 public class PesticideUpdateStrategy implements ProductDetailUpdateStrategy {
 
     // ? -> 농약 으로 그룹변경 할때
 
     @Override
-    public void updateDetails(Product product, ProductGroup originGroup, ProductGroup updateGroup, UpdateProductRequest request) {
+    public void updateDetail(Product product, ProductGroup originGroup, ProductGroup updateGroup, UpdateProductRequest request) {
 
         System.out.println("전략: 농약 선택됌");
 

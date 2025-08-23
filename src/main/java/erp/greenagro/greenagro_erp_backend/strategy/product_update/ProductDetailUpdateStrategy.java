@@ -1,4 +1,4 @@
-package erp.greenagro.greenagro_erp_backend.strategy;
+package erp.greenagro.greenagro_erp_backend.strategy.product_update;
 
 import erp.greenagro.greenagro_erp_backend.dto.product.UpdateProductRequest;
 import erp.greenagro.greenagro_erp_backend.model.entity.Product;
@@ -14,6 +14,6 @@ public interface ProductDetailUpdateStrategy {
      * @param updateGroup 변경할 그룹
      * @param request 업데이트 DTO
      */
-    void updateDetails(Product product, ProductGroup originGroup, ProductGroup updateGroup, UpdateProductRequest request);
+    void updateDetail(Product product, ProductGroup originGroup, ProductGroup updateGroup, UpdateProductRequest request);
 
 }
