@@ -256,7 +256,12 @@ public class ProductService {
         //1. 해당 품목그룹 조회
         ProductGroup productGroup = productGroupRepository.findById(id).orElseThrow(() -> new CustomException(PRODUCT_GROUP_NOT_FOUND, id));
 
-        //2. 그룹에 속한 상품 있으면 삭제 불가
+        //2. 품목 그룹 삭제 가능 여부
+        if(!productGroup.isRemovable()){
+            throw new CustomException(NOT_REMOVABLE_PRODUCT_GROUP);
+        }
+
+        //3. 그룹에 속한 상품 있으면 삭제 불가
         if(productRepository.existsByProductGroup(productGroup)){
 
             List<LookupDTO> errors = productRepository.findAllByProductGroup(productGroup).stream().map(p ->
@@ -266,7 +271,7 @@ public class ProductService {
             throw new CustomException(RESOURCE_IN_USE, errors);
         }
 
-        //3. 삭제
+        //4. 삭제
         productGroupRepository.delete(productGroup);
     }
 
