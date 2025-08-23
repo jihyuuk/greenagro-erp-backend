@@ -33,4 +33,8 @@ public class UpdateProductRequest {
 
     private String memo;                    //비고
 
+    //농약일때만
+    private String ingredient;              // 원제
+    private String targetPest;              // 적용 해충
+
 }

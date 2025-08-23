@@ -34,6 +34,7 @@ public class ProductService {
     private final ProductRepository productRepository;
     private final ProductGroupRepository productGroupRepository;
     private final PartnerRepository partnerRepository;
+    private final Map<String, ProductDetailUpdateStrategy> updateStrategyMap;
 
 
     //품목 생성
@@ -50,7 +51,7 @@ public class ProductService {
         ProductGroup group = productGroupRepository.findById(request.getProductGroupId()).orElseThrow(() -> new CustomException(PRODUCT_GROUP_NOT_FOUND, request.getProductGroupId()));
 
         //3. 회사 조회 (회사 강제)
-        Partner partner = partnerRepository.findById(request.getPartnerId()).orElseThrow(() -> new CustomException(EMPLOYEE_NOT_FOUND, request.getPartnerId()));
+        Partner partner = partnerRepository.findById(request.getPartnerId()).orElseThrow(() -> new CustomException(PARTNER_NOT_FOUND, request.getPartnerId()));
 
 
         //4. 품목 빌더 생성 및 공통 필드 입력
@@ -95,21 +96,43 @@ public class ProductService {
         //1. 해당 품목 조회
         Product product = productRepository.findById(id).orElseThrow(() -> new CustomException(PRODUCT_NOT_FOUND, id));
 
-        //2. 중복 체크 - 품목코드, 품목명
+        //2. 품목 그룹 조회 (그룹 강제)
+        ProductGroup updateGroup = productGroupRepository.findById(request.getProductGroupId()).orElseThrow(() -> new CustomException(PRODUCT_GROUP_NOT_FOUND, request.getProductGroupId()));
+
+        //3. 회사 조회 (회사 강제)
+        Partner updatePartner = partnerRepository.findById(request.getPartnerId()).orElseThrow(() -> new CustomException(PARTNER_NOT_FOUND, request.getPartnerId()));
+
+        //4. 중복 체크 - 품목코드, 품목명
         DuplicationValidator.validate(dv -> dv
                 .check(!product.getCode().equals(request.getCode()) && productRepository.existsByCode(request.getCode()), "code", request.getCode())
                 .check(!product.getName().equals(request.getName()) && productRepository.existsByName(request.getName()), "name", request.getName())
         );
 
-        //3. 품목 그룹 조회
-        ProductGroup productGroup = null;
-        if(request.getProductGroupId() != null)
-            productGroup = productGroupRepository.findById(request.getProductGroupId()).orElseThrow(() -> new CustomException(PRODUCT_GROUP_NOT_FOUND, request.getProductGroupId()));
 
-        //4. 회사 조회
-        Partner partner = null;
-        if(request.getPartnerId() != null)
-            partner = partnerRepository.findById(request.getPartnerId()).orElseThrow(() -> new CustomException(PARTNER_NOT_FOUND, request.getPartnerId()));
+        ProductGroupType originGroupType = product.getProductGroup().getType();
+        ProductGroupType updateGroupType = updateGroup.getType();
+
+//        1. 노말일때
+//                -> 노말 - 아무것도x
+//                -> 농약 - pesticideDetail 생성
+//                -> 씨앗 - seedDetail 생성
+//
+//        2. 농약일때
+//                -> 노말 - pesticideDetail 삭제
+//                -> 농약 - pesticideDetail 수정
+//                -> 씨앗 - pesticideDetail 삭제, seedDetail 생성
+//
+//        3. 씨앗일때
+//                -> 노말 - seedDetail 삭제
+//                -> 농약 - seedDetail 삭제, pesticide 생성
+//                -> 씨앗 - seedDetail 수정
+//
+//          그룹타입이 다르면 해당 디테일 삭제 후 새로운 디테일 추가
+//          그룹타입이 같아도 해당 디테일 삭제 후 수정된 디테일 추가
+
+        ProductDetailUpdateStrategy strategy = updateStrategyMap.get(updateGroupType.name());
+
+        strategy.updateDetails(product, product.getProductGroup(), updateGroup, request);
 
 
         //5. 수정하기
@@ -119,14 +142,17 @@ public class ProductService {
                 request.getName(),
                 request.getSpec(),
                 request.getBoxQuantity(),
-                productGroup,
-                partner,
+                updateGroup,
+                updatePartner,
                 request.getTaxType(),
                 request.getDistChannel(),
                 request.getPurchasePrice(),
                 request.getSalePrice(),
                 request.getMemo()
         );
+
+        //6. 커스텀 그룹 필드 업데이트
+
     }
 
 
@@ -196,7 +222,7 @@ public class ProductService {
         productRepository.delete(product);
     }
 
-
+    //---------------------------------------------------------------------------------
 
     //그룹 생성
     @Transactional
@@ -208,7 +234,7 @@ public class ProductService {
         );
 
         //2. 엔티티 생성
-        ProductGroup productGroup = new ProductGroup(request.getName());
+        ProductGroup productGroup = new ProductGroup(request.getName(), NORMAL);
 
         //3. 저장
         productGroupRepository.save(productGroup);
