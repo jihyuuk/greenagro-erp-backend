@@ -8,14 +8,14 @@ import erp.greenagro.greenagro_erp_backend.dto.productgroup.CreateProductGroupRe
 import erp.greenagro.greenagro_erp_backend.dto.productgroup.ProductGroupDTO;
 import erp.greenagro.greenagro_erp_backend.exception.CustomException;
 import erp.greenagro.greenagro_erp_backend.model.entity.Partner;
-import erp.greenagro.greenagro_erp_backend.model.entity.PesticideDetail;
 import erp.greenagro.greenagro_erp_backend.model.entity.Product;
 import erp.greenagro.greenagro_erp_backend.model.entity.ProductGroup;
 import erp.greenagro.greenagro_erp_backend.model.enums.ProductGroupType;
 import erp.greenagro.greenagro_erp_backend.repository.PartnerRepository;
 import erp.greenagro.greenagro_erp_backend.repository.ProductGroupRepository;
 import erp.greenagro.greenagro_erp_backend.repository.ProductRepository;
-import erp.greenagro.greenagro_erp_backend.strategy.ProductDetailUpdateStrategy;
+import erp.greenagro.greenagro_erp_backend.strategy.product_create.ProductDetailCreateStrategy;
+import erp.greenagro.greenagro_erp_backend.strategy.product_update.ProductDetailUpdateStrategy;
 import erp.greenagro.greenagro_erp_backend.validator.DuplicationValidator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -34,6 +34,7 @@ public class ProductService {
     private final ProductRepository productRepository;
     private final ProductGroupRepository productGroupRepository;
     private final PartnerRepository partnerRepository;
+    private final Map<String, ProductDetailCreateStrategy> createStrategyMap;
     private final Map<String, ProductDetailUpdateStrategy> updateStrategyMap;
 
 
@@ -70,12 +71,9 @@ public class ProductService {
                 .memo(request.getMemo());
 
 
-        //5. 농약 일때 추가 필드
-        if(group.getType() == PESTICIDE){
-            PesticideDetail pesticideDetail = new PesticideDetail(request.getIngredient(), request.getTargetPest());
-            productBuilder.pesticideDetail(pesticideDetail);
-        }
-        //커스텀 그룹 필요할때 여기에 추가하면 됌
+        //5. 그룹 타입(농약/씨앗 등)에 따라 전용 디테일 생성
+        ProductDetailCreateStrategy strategy = createStrategyMap.get(group.getType().name()+"_CREATE");
+        strategy.createDetail(productBuilder, request);
 
 
         //6. 빌더 -> 엔티티
@@ -109,33 +107,16 @@ public class ProductService {
         );
 
 
-        ProductGroupType originGroupType = product.getProductGroup().getType();
+        //6. 그룹 타입(농약/씨앗 등)에 따라 전용 디테일 수정
+
         ProductGroupType updateGroupType = updateGroup.getType();
 
-//        1. 노말일때
-//                -> 노말 - 아무것도x
-//                -> 농약 - pesticideDetail 생성
-//                -> 씨앗 - seedDetail 생성
-//
-//        2. 농약일때
-//                -> 노말 - pesticideDetail 삭제
-//                -> 농약 - pesticideDetail 수정
-//                -> 씨앗 - pesticideDetail 삭제, seedDetail 생성
-//
-//        3. 씨앗일때
-//                -> 노말 - seedDetail 삭제
-//                -> 농약 - seedDetail 삭제, pesticide 생성
-//                -> 씨앗 - seedDetail 수정
-//
-//          그룹타입이 다르면 해당 디테일 삭제 후 새로운 디테일 추가
-//          그룹타입이 같아도 해당 디테일 삭제 후 수정된 디테일 추가
+        ProductDetailUpdateStrategy strategy = updateStrategyMap.get(updateGroupType.name()+"_UPDATE"); //null 포인트 에러?
 
-        ProductDetailUpdateStrategy strategy = updateStrategyMap.get(updateGroupType.name());
-
-        strategy.updateDetails(product, product.getProductGroup(), updateGroup, request);
+        strategy.updateDetail(product, product.getProductGroup(), updateGroup, request);
 
 
-        //5. 수정하기
+        //7. 공통 필드 수정하기
         product.update(
                 request.getImgUrl(),
                 request.getCode(),
@@ -150,8 +131,6 @@ public class ProductService {
                 request.getSalePrice(),
                 request.getMemo()
         );
-
-        //6. 커스텀 그룹 필드 업데이트
 
     }
 
