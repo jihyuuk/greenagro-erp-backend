@@ -35,7 +35,7 @@ public class ProductService {
     private final ProductRepository productRepository;
     private final ProductGroupRepository productGroupRepository;
     private final PartnerRepository partnerRepository;
-    
+
     private final ProductDetailCreateRegistry createRegistry;
     private final ProductDetailUpdateRegistry updateRegistry;
 
@@ -147,21 +147,42 @@ public class ProductService {
         return products.stream().map(product -> {
 
             ProductGroup group = product.getProductGroup();
+            ProductGroupType type = group.getType();
             Partner partner = product.getPartner();
 
-            return new ProductSummaryResponse(
-                    product.getId(),
-                    product.getImgUrl(),
-                    product.getCode(),
-                    product.getName(),
-                    product.getSpec(),
-                    product.getBoxQuantity(),
-                    new ProductGroupDTO(group.getId(), group.getName()),
-                    new PartnerDTO(partner.getId(), partner.getPartnerName()),
-                    product.getTaxType().toString(),
-                    product.getDistChannel().toString(),
-                    product.getSalePrice()
-            );
+            if(type == NORMAL){
+                return new ProductSummaryResponse(
+                        product.getId(),
+                        product.getImgUrl(),
+                        product.getCode(),
+                        product.getName(),
+                        product.getSpec(),
+                        product.getBoxQuantity(),
+                        new ProductGroupDTO(group.getId(), group.getName()),
+                        new PartnerDTO(partner.getId(), partner.getPartnerName()),
+                        product.getTaxType().toString(),
+                        product.getDistChannel().toString(),
+                        product.getSalePrice()
+                );
+            } else if (type == PESTICIDE) {
+                return new PesticideSummaryResponse(
+                        product.getId(),
+                        product.getImgUrl(),
+                        product.getCode(),
+                        product.getName(),
+                        product.getSpec(),
+                        product.getBoxQuantity(),
+                        new ProductGroupDTO(group.getId(), group.getName()),
+                        new PartnerDTO(partner.getId(), partner.getPartnerName()),
+                        product.getTaxType().toString(),
+                        product.getDistChannel().toString(),
+                        product.getSalePrice(),
+                        product.getPesticideDetail().getIngredient(),
+                        product.getPesticideDetail().getTargetPest()
+                );
+            }else{
+                throw new CustomException(INTERNAL_SERVER_ERROR);
+            }
         }).toList();
     }
 
@@ -174,21 +195,46 @@ public class ProductService {
                 .orElseThrow(() -> new CustomException(PRODUCT_NOT_FOUND, id));
 
         //2. dto 변환
-        return new ProductDetailResponse(
-                product.getId(),
-                product.getImgUrl(),
-                product.getCode(),
-                product.getName(),
-                product.getSpec(),
-                product.getBoxQuantity(),
-                new ProductGroupDTO(product.getProductGroup().getId(), product.getProductGroup().getName()),
-                new PartnerDTO(product.getPartner().getId(), product.getPartner().getPartnerName()),
-                product.getTaxType(),
-                product.getDistChannel(),
-                product.getPurchasePrice(),
-                product.getSalePrice(),
-                product.getMemo()
-        );
+        ProductGroupType type = product.getProductGroup().getType();
+
+        if(type == NORMAL){
+            return new ProductDetailResponse(
+                    product.getId(),
+                    product.getImgUrl(),
+                    product.getCode(),
+                    product.getName(),
+                    product.getSpec(),
+                    product.getBoxQuantity(),
+                    new ProductGroupDTO(product.getProductGroup().getId(), product.getProductGroup().getName()),
+                    new PartnerDTO(product.getPartner().getId(), product.getPartner().getPartnerName()),
+                    product.getTaxType(),
+                    product.getDistChannel(),
+                    product.getPurchasePrice(),
+                    product.getSalePrice(),
+                    product.getMemo()
+            );
+        } else if (type == PESTICIDE) {
+            return new PesticideDetailResponse(
+                    product.getId(),
+                    product.getImgUrl(),
+                    product.getCode(),
+                    product.getName(),
+                    product.getSpec(),
+                    product.getBoxQuantity(),
+                    new ProductGroupDTO(product.getProductGroup().getId(), product.getProductGroup().getName()),
+                    new PartnerDTO(product.getPartner().getId(), product.getPartner().getPartnerName()),
+                    product.getTaxType(),
+                    product.getDistChannel(),
+                    product.getPurchasePrice(),
+                    product.getSalePrice(),
+                    product.getMemo(),
+                    product.getPesticideDetail().getIngredient(),
+                    product.getPesticideDetail().getTargetPest()
+            );
+        }else{
+            throw new CustomException(INTERNAL_SERVER_ERROR);
+        }
+
     }
 
 
