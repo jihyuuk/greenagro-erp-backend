@@ -3,10 +3,17 @@ package erp.greenagro.greenagro_erp_backend.strategy.product_create;
 import erp.greenagro.greenagro_erp_backend.dto.product.CreateProductRequest;
 import erp.greenagro.greenagro_erp_backend.model.entity.PesticideDetail;
 import erp.greenagro.greenagro_erp_backend.model.entity.Product;
+import erp.greenagro.greenagro_erp_backend.model.enums.ProductGroupType;
 import org.springframework.stereotype.Component;
 
-@Component("PESTICIDE_CREATE")
+@Component
 public class PesticideCreateStrategy implements ProductDetailCreateStrategy {
+
+    @Override
+    public ProductGroupType supports() {
+        return ProductGroupType.PESTICIDE;
+    }
+
 
     @Override
     public void createDetail(Product.ProductBuilder productBuilder, CreateProductRequest request) {

@@ -11,6 +11,7 @@ import erp.greenagro.greenagro_erp_backend.model.entity.Partner;
 import erp.greenagro.greenagro_erp_backend.model.entity.Product;
 import erp.greenagro.greenagro_erp_backend.model.entity.ProductGroup;
 import erp.greenagro.greenagro_erp_backend.model.enums.ProductGroupType;
+import erp.greenagro.greenagro_erp_backend.registry.ProductDetailCreateRegistry;
 import erp.greenagro.greenagro_erp_backend.repository.PartnerRepository;
 import erp.greenagro.greenagro_erp_backend.repository.ProductGroupRepository;
 import erp.greenagro.greenagro_erp_backend.repository.ProductRepository;
@@ -34,7 +35,7 @@ public class ProductService {
     private final ProductRepository productRepository;
     private final ProductGroupRepository productGroupRepository;
     private final PartnerRepository partnerRepository;
-    private final Map<String, ProductDetailCreateStrategy> createStrategyMap;
+    private final ProductDetailCreateRegistry createRegistry;
     private final Map<String, ProductDetailUpdateStrategy> updateStrategyMap;
 
 
@@ -72,7 +73,7 @@ public class ProductService {
 
 
         //5. 그룹 타입(농약/씨앗 등)에 따라 전용 디테일 생성
-        ProductDetailCreateStrategy strategy = createStrategyMap.get(group.getType().name()+"_CREATE");
+        ProductDetailCreateStrategy strategy = createRegistry.get(group.getType());
         strategy.createDetail(productBuilder, request);
 
 
