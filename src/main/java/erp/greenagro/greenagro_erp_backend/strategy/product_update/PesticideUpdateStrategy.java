@@ -4,21 +4,24 @@ import erp.greenagro.greenagro_erp_backend.dto.product.UpdateProductRequest;
 import erp.greenagro.greenagro_erp_backend.model.entity.PesticideDetail;
 import erp.greenagro.greenagro_erp_backend.model.entity.Product;
 import erp.greenagro.greenagro_erp_backend.model.entity.ProductGroup;
+import erp.greenagro.greenagro_erp_backend.model.enums.ProductGroupType;
 import org.springframework.stereotype.Component;
 
-@Component("PESTICIDE_UPDATE")
+@Component
 public class PesticideUpdateStrategy implements ProductDetailUpdateStrategy {
 
     // ? -> 농약 으로 그룹변경 할때
 
     @Override
-    public void updateDetail(Product product, ProductGroup originGroup, ProductGroup updateGroup, UpdateProductRequest request) {
+    public ProductGroupType supports() {
+        return ProductGroupType.PESTICIDE;
+    }
 
-        System.out.println("전략: 농약 선택됌");
+    @Override
+    public void updateDetail(Product product, ProductGroup originGroup, ProductGroup updateGroup, UpdateProductRequest request) {
 
         //기존 그룹이 농약이 아니었을때
         if(!originGroup.equals(updateGroup)){
-            System.out.println("기존 기룹이 농약이 아니었을때 로직 실행");
             // 모든 디테일 초기화
             product.resetDetails();
 
@@ -26,7 +29,6 @@ public class PesticideUpdateStrategy implements ProductDetailUpdateStrategy {
             PesticideDetail pesticideDetail = new PesticideDetail(request.getIngredient(), request.getTargetPest());
             product.setPesticideDetail(pesticideDetail);
         }else{
-            System.out.println("농약 -> 농약 로직 실행");
             //농약 -> 농약 (그룹 변경 x)
 
             //농약 디테일 수정

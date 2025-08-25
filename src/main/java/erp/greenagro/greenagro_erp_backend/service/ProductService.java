@@ -12,6 +12,7 @@ import erp.greenagro.greenagro_erp_backend.model.entity.Product;
 import erp.greenagro.greenagro_erp_backend.model.entity.ProductGroup;
 import erp.greenagro.greenagro_erp_backend.model.enums.ProductGroupType;
 import erp.greenagro.greenagro_erp_backend.registry.ProductDetailCreateRegistry;
+import erp.greenagro.greenagro_erp_backend.registry.ProductDetailUpdateRegistry;
 import erp.greenagro.greenagro_erp_backend.repository.PartnerRepository;
 import erp.greenagro.greenagro_erp_backend.repository.ProductGroupRepository;
 import erp.greenagro.greenagro_erp_backend.repository.ProductRepository;
@@ -23,7 +24,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.Map;
 
 import static erp.greenagro.greenagro_erp_backend.model.enums.ErrorCode.*;
 import static erp.greenagro.greenagro_erp_backend.model.enums.ProductGroupType.*;
@@ -35,8 +35,9 @@ public class ProductService {
     private final ProductRepository productRepository;
     private final ProductGroupRepository productGroupRepository;
     private final PartnerRepository partnerRepository;
+    
     private final ProductDetailCreateRegistry createRegistry;
-    private final Map<String, ProductDetailUpdateStrategy> updateStrategyMap;
+    private final ProductDetailUpdateRegistry updateRegistry;
 
 
     //품목 생성
@@ -112,7 +113,7 @@ public class ProductService {
 
         ProductGroupType updateGroupType = updateGroup.getType();
 
-        ProductDetailUpdateStrategy strategy = updateStrategyMap.get(updateGroupType.name()+"_UPDATE"); //null 포인트 에러?
+        ProductDetailUpdateStrategy strategy = updateRegistry.get(updateGroupType);
 
         strategy.updateDetail(product, product.getProductGroup(), updateGroup, request);
 

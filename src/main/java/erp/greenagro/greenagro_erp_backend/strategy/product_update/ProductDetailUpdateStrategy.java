@@ -3,8 +3,12 @@ package erp.greenagro.greenagro_erp_backend.strategy.product_update;
 import erp.greenagro.greenagro_erp_backend.dto.product.UpdateProductRequest;
 import erp.greenagro.greenagro_erp_backend.model.entity.Product;
 import erp.greenagro.greenagro_erp_backend.model.entity.ProductGroup;
+import erp.greenagro.greenagro_erp_backend.model.enums.ProductGroupType;
 
 public interface ProductDetailUpdateStrategy {
+
+    //지원 타입 반환
+    ProductGroupType supports();
 
 
     /**
