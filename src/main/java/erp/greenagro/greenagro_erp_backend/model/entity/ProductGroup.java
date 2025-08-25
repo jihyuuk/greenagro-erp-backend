@@ -1,9 +1,7 @@
 package erp.greenagro.greenagro_erp_backend.model.entity;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import erp.greenagro.greenagro_erp_backend.model.enums.ProductGroupType;
+import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -18,11 +16,17 @@ public class ProductGroup {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String name;        //그룹 이름
+    private String name;            //그룹 이름
 
+    @Enumerated(EnumType.STRING)
+    private ProductGroupType type;  //타입 (노말:기본, 농약)
 
-    public ProductGroup(String name) {
+    private boolean removable;      //삭제 가능 여부
+
+    public ProductGroup(String name, ProductGroupType type) {
         this.name = name;
+        this.type = type;
+        this.removable = true;
     }
 
     //수정하기

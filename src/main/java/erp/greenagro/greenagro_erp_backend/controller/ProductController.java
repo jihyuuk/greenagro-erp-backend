@@ -48,7 +48,7 @@ public class ProductController {
         return ResponseEntity.noContent().build();
     }
 
-
+    //----------------------------------------------------------------------
 
     //품목 생성
     @PostMapping("/products")
